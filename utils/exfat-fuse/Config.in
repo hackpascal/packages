@@ -1,0 +1,20 @@
+config PACKAGE_EXFAT_DUMP
+	bool "Include dumpexfat"
+	depends on PACKAGE_exfat-utils
+	default n
+
+config PACKAGE_EXFAT_FSCK
+	bool "Include fsck.exfat"
+	depends on PACKAGE_exfat-utils
+	default n
+
+config PACKAGE_EXFAT_LABEL
+	bool "Include exfatlabel"
+	depends on PACKAGE_exfat-utils
+	default n
+
+config PACKAGE_EXFAT_MKFS
+	bool "Include mkfs.exfat"
+	depends on PACKAGE_exfat-utils
+	default n
+
