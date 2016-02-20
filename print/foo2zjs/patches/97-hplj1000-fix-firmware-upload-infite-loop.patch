@@ -1,0 +1,37 @@
+--- a/hplj1000
++++ b/hplj1000
+@@ -24,12 +24,6 @@
+ #		Mike Morgan (2004)
+ #
+ 
+-# udev calls us twice on FC4! Just want /dev/usb/lp<N>
+-case "$DEVNAME" in
+-/dev/usb/usb*)	exit;;	# Bug: FC4
+-/dev/bus/usb/*)	exit;;	# Bug: Ubuntu 14
+-esac
+-
+ PROGNAME="$0"
+ 
+ #
+@@ -268,6 +262,7 @@
+     #
+     # force downloading to a specific device
+     #
++    if [ "$SUBSYSTEM" != "usbmisc" ]; then exit; fi
+     load_usblp "$DEV"
+ elif [ -x $USB_BACKEND ]; then
+         #
+@@ -275,11 +270,13 @@
+         # not need to care whether the system uses the usblp kernel module or
+         # libusb 
+         #
++        if [ "$SUBSYSTEM" != "usb" ]; then exit; fi
+         load_cups
+ elif [ -x $PRINTERID ]; then
+ 	#
+ 	# Sniff around for printers that need a firmware download
+ 	#
++	if [ "$SUBSYSTEM" != "usbmisc" ]; then exit; fi
+ 	usblps=`find /dev/usb -type c -name 'lp*'`" "`find /dev -type c -name 'usblp*'`
+ 	for dev in $usblps; do
+ 	    status=`$PRINTERID $dev 2>/dev/null | grep -y "hp LaserJet $MODEL"`

@@ -1,0 +1,36 @@
+--- a/foo2hp2600-wrapper.in
++++ b/foo2hp2600-wrapper.in
+@@ -203,7 +203,8 @@
+ QUALITY=wts
+ MEDIA=1
+ COPIES=1
+-PAPER=1
++test -r /etc/papersize && PAPER=$(cat /etc/papersize)
++test "$PAPER" || PAPER=1
+ RES=600x600
+ SOURCE=7
+ NUP=
+--- a/foo2oak-wrapper.in
++++ b/foo2oak-wrapper.in
+@@ -161,7 +161,8 @@
+ QUALITY=wts
+ MEDIA=1
+ COPIES=1
+-PAPER=1
++test -r /etc/papersize && PAPER=$(cat /etc/papersize)
++test "$PAPER" || PAPER=1
+ RES=600x600
+ SOURCE=7
+ NUP=
+--- a/foo2zjs-wrapper.in
++++ b/foo2zjs-wrapper.in
+@@ -205,7 +205,8 @@
+ QUALITY=wts
+ MEDIA=1
+ COPIES=1
+-PAPER=1
++test -r /etc/papersize && PAPER=$(cat /etc/papersize)
++test "$PAPER" || PAPER=1
+ RES=1200x600
+ SOURCE=7
+ NUP=

@@ -1,0 +1,23 @@
+--- a/icc2ps/cmsio1.c
++++ b/icc2ps/cmsio1.c
+@@ -71,6 +71,7 @@
+ #undef STEP
+ }
+ #else
++#include <unistd.h>
+ #define xswab swab
+ #endif
+ 
+--- a/icc2ps/Makefile
++++ b/icc2ps/Makefile
+@@ -10,6 +10,10 @@
+ 	cmslut.c cmsmatsh.c cmsmtrx.c cmsnamed.c cmspack.c cmspcs.c cmsps2.c \
+ 	cmssamp.c cmswtpnt.c cmsxform.c cmsio0.c cmsvirt.c
+ CFLAGS+=	-O3
++
++# _XOPEN_SOURCE is required for swab() but undefines strcasecmp(), so add _GNU_SOURCE as well:
++CFLAGS+= -D_XOPEN_SOURCE -D_GNU_SOURCE
++
+ INSTALL=install
+ ifeq ($(UNAME),SunOS)
+     INSTALL=/usr/ucb/install

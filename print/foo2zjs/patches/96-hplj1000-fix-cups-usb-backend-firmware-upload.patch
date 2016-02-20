@@ -1,0 +1,40 @@
+--- a/hplj1000
++++ b/hplj1000
+@@ -269,8 +269,14 @@
+     # force downloading to a specific device
+     #
+     load_usblp "$DEV"
+-elif [ -x $PRINTERID -o -x $USB_BACKEND ]; then
+-    if [ -x $PRINTERID ]; then
++elif [ -x $USB_BACKEND ]; then
++        #
++        # If we have CUPS installed, use the CUPS "usb" backend, as then we do
++        # not need to care whether the system uses the usblp kernel module or
++        # libusb 
++        #
++        load_cups
++elif [ -x $PRINTERID ]; then
+ 	#
+ 	# Sniff around for printers that need a firmware download
+ 	#
+@@ -289,20 +295,6 @@
+ 		fi
+ 	    fi
+ 	done
+-	if [ "$usblps" != " " ]; then
+-	    # All done!
+-	    exit
+-	fi
+-    fi
+-
+-    if [ -x $USB_BACKEND ]; then
+-	#
+-	# If we have CUPS installed, use the CUPS "usb" backend, as then we do
+-	# not need to care whether the system uses the usblp kernel module or
+-	# libusb
+-	#
+-	load_cups
+-    fi
+ else
+     log "HP LaserJet $MODEL firmware was not downloaded..."
+     log "...couldn't find $PRINTERID, DEV is not set, and CUPS not installed."

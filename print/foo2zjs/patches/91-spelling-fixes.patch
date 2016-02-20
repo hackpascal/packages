@@ -1,0 +1,46 @@
+--- a/icc2ps/cmsio1.c
++++ b/icc2ps/cmsio1.c
+@@ -1162,7 +1162,7 @@
+          AdjustEndianessArray16(NewLUT ->T, NewLUT->Tsize / sizeof(WORD));
+     }
+     else {
+-        cmsSignalError(LCMS_ERRC_ABORTED, "Unknow precission of '%d'", CLUT.prec); 
++        cmsSignalError(LCMS_ERRC_ABORTED, "Unknow precision of '%d'", CLUT.prec); 
+         return FALSE;
+     }
+ 
+--- a/icc2ps/icc2ps.c
++++ b/icc2ps/icc2ps.c
+@@ -139,8 +139,8 @@
+           
+      fprintf(stderr, "%cb - Black point compensation (CRD only)\n", SW);    
+      fprintf(stderr, "%cu - Do NOT generate resource name on CRD\n", SW);    
+-     fprintf(stderr, "%cc<0,1,2> - Precission (0=LowRes, 1=Normal (default), 2=Hi-res) (CRD only)\n", SW);     
+-     fprintf(stderr, "%cn<gridpoints> - Alternate way to set precission, number of CLUT points (CRD only)\n", SW);     
++     fprintf(stderr, "%cc<0,1,2> - Precision (0=LowRes, 1=Normal (default), 2=Hi-res) (CRD only)\n", SW);     
++     fprintf(stderr, "%cn<gridpoints> - Alternate way to set precision, number of CLUT points (CRD only)\n", SW);     
+      
+ 	 fprintf(stderr, "\n");
+      fprintf(stderr, "This program is intended to be a demo of the little cms\n"
+--- a/oakdecode.c
++++ b/oakdecode.c
+@@ -101,7 +101,7 @@
+ "Options:\n"
+ "       -d basename Basename of .pbm file for saving decompressed planes\n"
+ "       -r basename Basename of .jbg file for saving raw planes\n"
+-"       -i          Supress display of image records\n"
++"       -i          Suppress display of image records\n"
+ "       -o          Print file offsets\n"
+ "       -D lvl      Set Debug level [%d]\n"
+     , Debug
+--- a/qpdldecode.c
++++ b/qpdldecode.c
+@@ -82,7 +82,7 @@
+ "\n"
+ "	Decode a QPDL stream into human readable form.\n"
+ "\n"
+-"	A Quick Page Description Langauge (QPDL) is the printer language"
++"	A Quick Page Description Language (QPDL) is the printer language"
+ "	used by some Samsung printers, such as the CLP-600n.\n"
+ "\n"
+ "	Also known as SPLC."
