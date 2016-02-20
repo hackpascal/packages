@@ -1,0 +1,4 @@
+#!/bin/sh
+
+[ -d /usr/lib/cups/backend ] && chmod 0754 /usr/lib/cups/backend/*
+
