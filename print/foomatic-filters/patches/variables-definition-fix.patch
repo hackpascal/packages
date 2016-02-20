@@ -1,0 +1,22 @@
+--- a/foomaticrip.h
++++ b/foomaticrip.h
+@@ -123,15 +123,15 @@
+ extern char **jclprepend;
+ extern int jobhasjcl;
+ extern const char *accounting_prolog;
+-extern char fileconverter[PATH_MAX];
+-extern char cupsfilterpath[PATH_MAX];
++extern char fileconverter[];
++extern char cupsfilterpath[];
+ extern int debug;
+ extern int do_docs;
+ extern char printer_model[];
+ extern int dontparse;
+ extern int pdfconvertedtops;
+-extern char gspath[PATH_MAX];
+-extern char echopath[PATH_MAX];
++extern char gspath[];
++extern char echopath[];
+ 
+ #endif
+ 

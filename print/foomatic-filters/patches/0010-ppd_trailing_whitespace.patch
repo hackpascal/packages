@@ -1,0 +1,13 @@
+--- a/options.c
++++ b/options.c
+@@ -1628,6 +1628,10 @@
+         /* remove last newline */
+         dstrremovenewline(value);
+ 
++        /* remove last whitespace */
++        /* new 2014-08-17         */
++        dstrtrim_right(value);
++
+         /* process key/value pairs */
+         if (strcmp(key, "NickName") == 0) {
+             unhtmlify(printer_model, 256, value->data);

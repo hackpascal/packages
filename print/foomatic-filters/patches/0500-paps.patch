@@ -1,0 +1,174 @@
+--- a/ChangeLog
++++ b/ChangeLog
+@@ -1,3 +1,9 @@
++2014-11-28  Till Kamppeter <till.kamppeter@gmail.com>
++
++	* Added support for the text-to-PostScript converter paps which
++	  supports UTF-8 input. Thanks to Stéphane Aulery (saulery at free
++	  dot fr) for the patch (Bug #1239).
++
+ 2012-07-02  Till Kamppeter <till.kamppeter@gmail.com>
+ 
+ 	* Tagged branch for release 4.0.17.
+--- a/README
++++ b/README
+@@ -341,12 +341,12 @@ from the first subprocess and the giving
+ main process. This way the main process has again PostScript as its
+ standard input.
+ 
+-Supported file conversion filters are "a2ps", "enscript", "mpage", and
+-spooler-specific filters. All filters convert plain text to
++Supported file conversion filters are "a2ps", "enscript", "mpage",
++"paps", and spooler-specific filters. All filters convert plain text to
+ PostScript, "a2ps" also other formats. The conversion filter is always
+-used when one prints the documentation pages, as they are created as
+-plain text, when CUPS is the spooler "pstops" is executed after the
+-filter so that the default option settings from the PPD file and
++used when one prints the documentation pages, as they are created
++as plain text, when CUPS is the spooler "pstops" is executed after
++the filter so that the default option settings from the PPD file and
+ CUPS-specific options as N-up get applied. On regular printouts one
+ gets always PostScript or PDF when CUPS is the spooler and PostScript
+ in the case of PPR, so the filter is only used for regular printouts
+--- a/USAGE
++++ b/USAGE
+@@ -52,7 +52,7 @@ software printer drivers are supported.
+ printing of various non-PostScript/PDF file types for spoolers which
+ do not support these by themselves (LPD, LPRng, GNUlpr, spooler-less
+ printing). To enable this feature you need to have "a2ps", "enscript",
+-or "mpage" installed.
++"mpage", or "paps" installed.
+ 
+ Another problem is that the way how to install queues, to print files,
+ and to handle jobs is very different with different spoolers. LPD for
+@@ -85,10 +85,10 @@ To run beh (Backend Error Handler) or th
+ To connect to remote printers with a non-CUPS printing system, you
+ need additional connectivity software (as "rlpr", "nc", "smbspool',
+ ...). To print non-PostScript/PDF files with LPD, LPRng, GNUlpr, or
+-without spooler, you will need a2ps, enscript, mpage, or similar
++without spooler, you will need a2ps, enscript, mpage, paps, or similar
+ filters which convert non-PostScript files to PostScript. a2ps,
+-enscript, and mpage will be automatically used by the scripts when
+-they are installed.
++enscript, mpage, and paps will be automatically used by the scripts
++when they are installed.
+ 
+ Download sources:
+ rlpr: http://freshmeat.net/projects/rlpr/ or
+@@ -174,11 +174,13 @@ make PostScript out of non-PostScript fi
+ those non-PostScript files and also a list of available options using
+ the "docs" option. The supported utilities are "a2ps"
+ (http://www-inf.enst.fr/~demaille/a2ps/), "enscript"
+-(http://people.ssh.fi/mtr/genscript/), and "mpage"
+-(http://www.mesa.nl/pub/mpage). Recommended is "a2ps" because it
++(http://people.ssh.fi/mtr/genscript/), "mpage"
++(http://www.mesa.nl/pub/mpage), and "paps"
++(http://paps.sourceforge.net/). Recommended is "a2ps" because it
+ detects many file types (text, most image formats) and together with
+-ImageMagick (for images) and Ghostscript it converts them to
+-PostScript. The other tools convert only text files. The tool you have
++ImageMagick (for images) and Ghostscript it converts them to PostScript.
++The other tools convert only text files. However at present paps
++is the only one to support files encoded in utf-8. The tool you have
+ installed is auto-detected by foomatic-rip and used automatically if
+ necessary. PPR needs this tool only for printing the option list, and
+ CUPS does not need it at all. PPR and CUPS use internal filters for
+--- a/configure.ac
++++ b/configure.ac
+@@ -109,13 +109,14 @@ AC_ARG_ENABLE(file-converter-check, [  -
+   AC_MSG_WARN([Absence of a file converter is ignored, package will be built anyway])
+ fi])
+ 
+-# Check for a2ps, enscript, mpage
++# Check for a2ps, enscript, mpage, paps
+ AC_PATH_PROG(A2PS,a2ps)
+ AC_PATH_PROG(ENSCRIPT,enscript)
+ AC_PATH_PROG(MPAGE,mpage)
++AC_PATH_PROG(PAPS,paps)
+ AC_PATH_PROG(TEXTTOPS,texttops,,$CUPS_FILTERS)
+ 
+-AC_ARG_WITH(file-converter,[  --with-file-converter=[a2ps|enscript|mpage]
++AC_ARG_WITH(file-converter,[  --with-file-converter=[a2ps|enscript|mpage|paps]
+ 			Default: auto],
+ 	FILECONVERTER="$withval",
+ 	FILECONVERTER="")
+@@ -130,8 +131,8 @@ if test x$enable_dbus = xyes; then
+ 	PKG_CHECK_MODULES(DBUS, dbus-1)
+ fi
+ 
+-if test "${NOCONVERTERCHECK}" = "" -a "${A2PS}" = "" -a "${ENSCRIPT}" = "" -a "${MPAGE}" = "" -a "${TEXTTOPS}" = "" ; then
+-	AC_MSG_ERROR([cannot find a2ps, enscript, mpage, or CUPS' texttops.  You need to have at least one installed]);
++if test "${NOCONVERTERCHECK}" = "" -a "${A2PS}" = "" -a "${ENSCRIPT}" = "" -a "${MPAGE}" = "" -a "${PAPS}" = "" -a "${TEXTTOPS}" = "" ; then
++	AC_MSG_ERROR([cannot find a2ps, enscript, mpage, paps, or CUPS' texttops.  You need to have at least one installed]);
+ fi
+ 
+ AC_ARG_WITH(echo,[  --with-echo=(path to GNU compatible echo command)
+--- a/fileconverter.c
++++ b/fileconverter.c
+@@ -40,6 +40,7 @@ const char *fileconverters[][2] = {
+     { "a2ps", "a2ps -1 @@--medium=@@PAGESIZE@@ @@--center-title=@@JOBTITLE@@ -o -" },
+     { "enscript", "enscript -G @@-M @@PAGESIZE@@ @@-b \"Page $%|@@JOBTITLE@@ --margins=36:36:36:36 --mark-wrapped-lines=arrow --word-wrap -p-" },
+     { "mpage", "mpage -o -1 @@-b @@PAGESIZE@@ @@-H -h @@JOBTITLE@@ -m36l36b36t36r -f -P- -" },
++    { "paps", "paps @@--paper @@PAGESIZE@@ --header --font=11.5" },
+     { NULL, NULL }
+ };
+ 
+--- a/filter.conf
++++ b/filter.conf
+@@ -5,8 +5,8 @@
+ 
+ # Enter here your personal command for converting non-PostScript files
+ # (especially text) to PostScript. Supported commands are "a2ps",
+-# "enscript" or "mpage". Command line options will be automatically
+-# set by "foomatic-rip".
++# "enscript", "mpage" or "paps". Command line options will be
++# automatically set by "foomatic-rip".
+ 
+ # textfilter: a2ps
+ 
+--- a/foomatic-rip.1.in
++++ b/foomatic-rip.1.in
+@@ -90,8 +90,17 @@ were supplied by the spooler.
+ .P
+ Non-PostScript/PDF files are translated to PostScript before they are
+ passed to the renderer. This is usually done by \fBa2ps(1)\fR,
+-\fBenscript(1)\fR, or \fBmpage(1)\fR. foomatic-rip auto-detects which
+-program is installed, but manual configuration is also possible.
++\fBenscript(1)\fR, \fBmpage(1)\fR, or \fBpaps(1)\fR. foomatic-rip
++auto-detects which program is installed, but manual configuration is
++also possible.
++
++.P
++
++Recommended is \fBa2ps\fR because it detects many file types (text, most
++image formats) and together with \fBImageMagick(1)\fR (for images) and
++\fBGhostscript(1)\fR it converts them to PostScript. The other tools convert
++only text files. However at present \fBpaps\fR is the only one to support
++files encoded in utf-8.
+ 
+ .P
+ foomatic-rip does not only apply option settings supplied by the user
+@@ -215,7 +224,7 @@ therefore get ignored):
+ .TP 10
+ .BI textfilter: \ <command>
+ \fRSelects the filter for input files which are not PostScript or PDF.
+-\fI<command>\fR is one of \fBa2ps\fR, \fBenscript\fR, or \fBmpage\fR.
++\fI<command>\fR is one of \fBa2ps\fR, \fBenscript\fR, \fBmpage\fR, or \fBpaps\fR.
+ foomatic-rip automatically selects the needed command line options.
+ 
+ .TP 10
+--- a/postscript.c
++++ b/postscript.c
+@@ -131,9 +131,9 @@ int line_type(const char *line)
+     features described in the PPD file.
+ 
+     Supported file conversion filters are "a2ps", "enscript",
+-    "mpage", and spooler-specific filters. All filters convert
+-    plain text to PostScript, "a2ps" also other formats. The
+-    conversion filter is always used when one prints the
++    "mpage", "paps", and spooler-specific filters. All filters
++    convert plain text to PostScript, "a2ps" also other formats.
++    The conversion filter is always used when one prints the
+     documentation pages, as they are created as plain text,
+     when CUPS is the spooler "pstops" is executed after the
+     filter so that the default option settings from the PPD file

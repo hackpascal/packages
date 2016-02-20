@@ -1,0 +1,143 @@
+--- a/foomaticrip.c
++++ b/foomaticrip.c
+@@ -1633,7 +1633,7 @@
+         dstrcpy(postpipe, "| cat - > $LPDDEV");
+ 
+     if (postpipe->len)
+-        _log("Ouput will be redirected to:\n%s\n", postpipe);
++        _log("Output will be redirected to:\n%s\n", postpipe);
+ 
+ 
+     /* Print documentation page when asked for */
+--- a/foomatic-rip.1.in
++++ b/foomatic-rip.1.in
+@@ -18,69 +18,82 @@
+ .BI \fBfoomatic-rip\fR\ \fI<jobid>\fR \ \fI<user>\fR \ \fI<jobtitle>\fR \ \fI<numcopies>\fR \ \fI<options>\fR \ \fB[\fI<file>\fB]\fR 
+ 
+ .SS \fRLPRng filter:
+-.BI \fBfoomatic-rip\fR\ --lprng\  \fB[\fB-J\fI<jobtitle>\fB]\fR   \fB[\fB-Z\fI<option>\fB=\fI<value>\fB[,\fI<option>\fB=\fI<value>\fB[, \ \fB...]]\fR \ \fI<ppdfile>\fR
++.BI \fBfoomatic-rip\fR\ --lprng\  \fB[\fB-J\fI<jobtitle>\fB]\fR \ 
++\fB[\fB-Z\fI<option>\fB=\fI<value>\ 
++\fB[,\fI<option>\fB=\fI<value>\fB \ 
++\ [, \ \fB...]]\fR \ \fI<ppdfile>\fR
+ .br
+ 
+-.BI \fBfoomatic-rip\fR\ \ \fB[\fB-J\fI<jobtitle>\fB]\fR   \fB[\fB-Z\fI<option>\fB=\fI<value>\fB[,\fI<option>\fB=\fI<value>\fB[, \ \fB...]]\fR
++.BI \fBfoomatic-rip\fR\ \ \fB[\fB-J\fI<jobtitle>\fB]\fR   
++\fB[\fB-Z\fI<option>\fB=\fI<value>
++\fB[,\fI<option>\fB=\fI<value>\fB[, \ \fB...]]\fR
+ .br
+ (printcap :pdd=<ppdfile>)
+ 
+-.BI \fBfoomatic-rip\fR\ \fB--ppd\fR \ \fI<ppdfile>\fR   \fB[\fB-J\fI<jobtitle>\fB]\fR \ \fB[\fB-Z\fI<option>\fB=\fI<value>\fB[,\fI<option>\fB=\fI<value>\fB[, \ \fB...]]\fR
++.BI \fBfoomatic-rip\fR\ \fB--ppd\fR \ \fI<ppdfile>\fR   \fB[\fB-J\fI<jobtitle>\fB]\fR 
++\fB[\fB-Z\fI<option>\fB=\fI<value> 
++\fB[,\fI<option>\fB=\fI<value>\fB[, \ \fB...]]\fR
+ 
+ .SS \fRLPD/GNUlpr filter:
+-.BI \fBfoomatic-rip\fR\ \fB[\fB-w\fR\ \fI<number>\fB]\fR\ \fB[\fB-l\fR\ \fI<number>\fB]\fR\ \fB[\fB-x\fR\ \fI<number>\fB]\fR\ \fB[\fB-y\fR\ \fI<number>\fB]\fR\ \fB[\fB-i\fR\ \fI<number>\fB]\fR\ \fB[\fB-c\fB]\fR\ \fB[\fB-n\fR\ \fI<string>\fB]\fR\ \fB[\fB-h\fR\ \fI<string>\fB]\fR\ \fB[\fB-j|-J\fR\ \fI<jobtitle>\fB|\fI<options>\fB]\fR\ \fI<ppdfile>\fR
++.BI \fBfoomatic-rip\fR\ \fB[\fB-w\fR\ \fI<number>\fB]\fR\ \fB[\fB-l\fR\ \fI<number>\fB]\fR\ 
++\fB[\fB-x\fR\ \fI<number>\fB]\fR\ \fB[\fB-y\fR\ \fI<number>\fB]\fR\ 
++\fB[\fB-i\fR\ \fI<number>\fB]\fR\ \fB[\fB-c\fB]\fR\ \fB[\fB-n\fR\ \fI<string>\fB]\fR\ 
++\fB[\fB-h\fR\ \fI<string>\fB]\fR\ \fB[\fB-j|-J\fR\ \fI<jobtitle>\fB|\fI<options>\fB]\fR\ \fI<ppdfile>\fR
+ 
+ .SS \fRPPR RIP:
+ .BI \fBfoomatic-rip\fR\ \fB[\fI<option>\fB=\fI<value>\fR \ [...]]
+ 
+ .SS \fRPPR interface:
+-.BI \fBfoomatic-rip\fR\ \fI<queue>\fR \ \fI<destaddress>\fR \ \fI<options>\fR \ \fI<jobbreak>\fR \ \fI<feedback>\fR \ \fI<codes>\fR \ \fI<jobname>\fR \ \fI<routing>\fR \ \fI<for>\fR \ \fI<filetype>\fR \ \fB[\fI<file>\fB]\fR 
++.BI \fBfoomatic-rip\fR\ \fI<queue>\fR \ \fI<destaddress>\fR \ \fI<options>\fR \ \fI<jobbreak>\fR \ 
++\fI<feedback>\fR \ \fI<codes>\fR \ \fI<jobname>\fR \ \fI<routing>\fR \ \fI<for>\fR \ \fI<filetype>\fR \ \fB[\fI<file>\fB]\fR 
+ 
+ .SS \fRPDQ driver file generation:
+-.BI foomatic-rip\ \fB[\fB--ppd\fR \ \fI<ppdfile>\fB]\fR \ [\fB-o\fR \ \fI<option>\fB=\fI<value>\fR \ [...]] \ \fB--genpdq|--appendpdq|--genrawpdq|--appendrawpdq\fR
++.BI foomatic-rip\ \fB[\fB--ppd\fR \ \fI<ppdfile>\fB]\fR \ [\fB-o\fR \ 
++\fI<option>\fB=\fI<value>\fR \ [...]] \ \fB--genpdq|--appendpdq|--genrawpdq|--appendrawpdq\fR
+ 
+ .SS \fRPDQ filter:
+ .BI foomatic-rip\ \fB--pdq\fR\ \fB--ppd\fR \ \fI<ppdfile>\fR \fB]\fR \ [\fB-o\fR \ \fI<option>\fB=\fI<value>\fR \ [...]] \ \fI<file>\fR
+ 
+ .SS \fRCPS (newer versions) filter:
+-.BI \fBfoomatic-rip\fR\ \fB--cps\fR\ \fB-P\fR \ \fI<printer>\fR \ [\fB-J\fR\ \fI<jobtitle>\fR ] \ [\fB-o\fR \ \fI<option>\fB=\fI<value>\fR \ [...]] \ \fB[\fI<files>\fB]\fR
++.BI \fBfoomatic-rip\fR\ \fB--cps\fR\ \fB-P\fR \ \fI<printer>\fR \ 
++[\fB-J\fR\ \fI<jobtitle>\fR ] \ [\fB-o\fR \ \fI<option>\fB=\fI<value>\fR \ [...]] \ \fB[\fI<files>\fB]\fR
+ 
+ .SH DESCRIPTION
+ foomatic-rip is a universal print filter which works with every known free
+ software printer spooler. It has the following features:
+ 
+-.Topic 
++.P 
+ It translates PostScript and PDF (and also other file formats) from standard
+ input to the printer's native language (usually put to standard
+ output).
+ 
+-.Topic
++.P
+ The translation is done with an external renderer, usually Ghostscript
+ (\fBgs(1)\fR). If no translation is needed (PostScript printer) the
+ renderer's command line reduces to \fBcat(1)\fR. The way how this
+ translation is done is described in a \fBPPD file\fR.
+ 
+-.Topic
++.P
+ Printer capabilities, how to handle user options, and how to build the
+ renderer command line is always described by \fBPPD files\fR, these
+ PPD files usually come from \fBFoomatic\fR or can be the ones supplied by
+ the manufacturers of PostScript printers. The PPD files are the same
+ for all spoolers.
+ 
+-.Topic
++.P
+ foomatic-rip works with every known spooler (\fBCUPS\fR, \fBLPRng\fR,
+ \fBLPD\fR, \fBGNUlpr\fR, \fBPPR\fR, \fBPDQ\fR, \fBCPS\fR, and
+ \fBwithout spooler\fR). It auto-detects the spooler from which it was
+ called by the command line options and environment variables which
+ were supplied by the spooler.
+ 
+-.Topic
++.P
+ Non-PostScript/PDF files are translated to PostScript before they are
+ passed to the renderer. This is usually done by \fBa2ps(1)\fR,
+ \fBenscript(1)\fR, or \fBmpage(1)\fR. foomatic-rip auto-detects which
+ program is installed, but manual configuration is also possible.
+ 
+-.Topic
++.P
+ foomatic-rip does not only apply option settings supplied by the user
+ through the command line of the printing command, but also searches
+ the entire job for embedded option settings (only PostScript
+@@ -133,7 +146,7 @@
+ \fBfoomatic-rip\fR will print from standard input unless at least one file to
+ be printed is specified on the command line.
+ If your printer PPD file is stored as \fI@sysconfdir@/direct/<printer>.ppd\fR
+-or \fI~/.foomatic/direct/<printer>.ppd\fR you can use it by simply specifying "-P \fI<printer>\fR".
++or \fI~/.foomatic/direct/<printer>.ppd\fR you can use it by simply specifying "\-P \fI<printer>\fR".
+ 
+ Put a line
+ 
+@@ -146,7 +159,7 @@
+ \fB"\fR are not allowed in the \fI<command>\fR, replace them as
+ follows:
+ 
+-.CodeSkip
++.P
+ .nf
+ .B Character	Replacement
+ .B ---------------------
+@@ -173,12 +186,12 @@
+ for a TCP/Socket/JetDirect printer with the host name \fBprinter\fR
+ listening on port \fB9100\fR you need this:
+ 
+-\fB*FoomaticRIPPostPipe: "| /usr/bin/nc -w 1 printer 9100"\fR
++\fB*FoomaticRIPPostPipe: "| /usr/bin/nc \-w 1 printer 9100"\fR
+ 
+-Note the "-w 1" in the "nc" command line, it makes "nc" exiting
++Note the "\-w 1" in the "nc" command line, it makes "nc" exiting
+ immediately after the data is transferred to the printer.
+ 
+-\fB*FoomaticRIPPostPipe: "| rlpr -Plp@printserver"\fR
++\fB*FoomaticRIPPostPipe: "| rlpr \-Plp@printserver"\fR
+ 
+ directs your jobs to the LPD printer queue \fBlp\fR on the machine
+ named \fBprintserver\fR.
