@@ -1,0 +1,11 @@
+--- a/Makefile
++++ b/Makefile
+@@ -204,7 +204,7 @@
+ 		\$$(BUILDDIR)/$(basename $<).o" -MG "$<" -MF $@
+ 
+ # Load dependencies files 
+--include $(foreach dep,$(DEPENDENCIES),$(DEPDIR)/$(dep))
++#-include $(foreach dep,$(DEPENDENCIES),$(DEPDIR)/$(dep))
+ 
+ 
+ 
