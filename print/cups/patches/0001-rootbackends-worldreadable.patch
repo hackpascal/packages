@@ -1,0 +1,33 @@
+--- a/backend/Makefile
++++ b/backend/Makefile
+@@ -126,7 +126,7 @@
+ 	echo Installing backends in $(SERVERBIN)/backend
+ 	$(INSTALL_DIR) -m 755 $(SERVERBIN)/backend
+ 	for file in $(RBACKENDS); do \
+-		$(LIBTOOL) $(INSTALL_BIN) -m 700 $$file $(SERVERBIN)/backend; \
++		$(LIBTOOL) $(INSTALL_BIN) -m 755 $$file $(SERVERBIN)/backend; \
+ 	done
+ 	for file in $(UBACKENDS); do \
+ 		$(INSTALL_BIN) $$file $(SERVERBIN)/backend; \
+--- a/scheduler/cups-deviced.c
++++ b/scheduler/cups-deviced.c
+@@ -270,7 +270,7 @@
+     * all others run as the unprivileged user...
+     */
+ 
+-    start_backend(dent->filename, !(dent->fileinfo.st_mode & (S_IWGRP | S_IRWXO)));
++    start_backend(dent->filename, !(dent->fileinfo.st_mode & (S_IWGRP | S_IWOTH | S_IXOTH)));
+   }
+ 
+   cupsDirClose(dir);
+--- a/scheduler/job.c
++++ b/scheduler/job.c
+@@ -1233,7 +1233,7 @@
+       else if (stat(command, &backinfo))
+ 	backroot = 0;
+       else
+-        backroot = !(backinfo.st_mode & (S_IWGRP | S_IRWXO));
++        backroot = !(backinfo.st_mode & (S_IWGRP | S_IWOTH | S_IXOTH));
+ 
+       argv[0] = job->printer->sanitized_device_uri;
+ 

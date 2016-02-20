@@ -1,0 +1,13 @@
+--- a/conf/cupsd.conf.in
++++ b/conf/cupsd.conf.in
+@@ -8,6 +8,10 @@
+ LogLevel @CUPS_LOG_LEVEL@
+ @CUPS_PAGE_LOG_FORMAT@
+ 
++# Deactivate CUPS' internal logrotating, as we provide a better one, especially
++# LogLevel debug2 gets usable now
++MaxLogSize 0
++
+ # Only listen for connections from the local machine.
+ Listen localhost:@DEFAULT_IPP_PORT@
+ @CUPS_LISTEN_DOMAINSOCKET@
