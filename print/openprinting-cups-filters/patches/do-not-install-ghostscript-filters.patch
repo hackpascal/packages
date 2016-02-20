@@ -1,0 +1,49 @@
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -473,10 +473,6 @@
+ 	filter/pstopdf \
+ 	filter/textonly \
+ 	filter/texttops
+-if ENABLE_GHOSTSCRIPT
+-pkgfilter_SCRIPTS += \
+-	filter/gstopxl
+-endif
+ if ENABLE_BRAILLE
+ nodist_pkgfilter_SCRIPTS = \
+ 	filter/braille/drivers/generic/brftoembosser \
+@@ -499,10 +495,6 @@
+ 	texttopdf \
+ 	urftopdf \
+ 	rastertopdf
+-if ENABLE_GHOSTSCRIPT
+-pkgfilter_PROGRAMS += \
+-	gstoraster
+-endif
+ if ENABLE_FOOMATIC
+ pkgfilter_PROGRAMS += \
+ 	foomatic-rip
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -127,11 +127,9 @@
+ 	rastertoescpx$(EXEEXT) rastertopclx$(EXEEXT) \
+ 	texttopdf$(EXEEXT) urftopdf$(EXEEXT) rastertopdf$(EXEEXT) \
+ 	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3)
+-@ENABLE_GHOSTSCRIPT_TRUE@am__append_6 = \
+-@ENABLE_GHOSTSCRIPT_TRUE@	filter/gstopxl
++@ENABLE_GHOSTSCRIPT_TRUE@am__append_6 =
+ 
+-@ENABLE_GHOSTSCRIPT_TRUE@am__append_7 = \
+-@ENABLE_GHOSTSCRIPT_TRUE@	gstoraster
++@ENABLE_GHOSTSCRIPT_TRUE@am__append_7 =
+ 
+ @ENABLE_FOOMATIC_TRUE@am__append_8 = \
+ @ENABLE_FOOMATIC_TRUE@	foomatic-rip
+@@ -273,7 +271,7 @@
+ 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libphpcups_la_CFLAGS) \
+ 	$(CFLAGS) $(libphpcups_la_LDFLAGS) $(LDFLAGS) -o $@
+ @WITH_PHP_TRUE@am_libphpcups_la_rpath = -rpath $(phpextensiondir)
+-@ENABLE_GHOSTSCRIPT_TRUE@am__EXEEXT_1 = gstoraster$(EXEEXT)
++@ENABLE_GHOSTSCRIPT_TRUE@am__EXEEXT_1 = 
+ @ENABLE_FOOMATIC_TRUE@am__EXEEXT_2 = foomatic-rip$(EXEEXT)
+ @ENABLE_IMAGEFILTERS_TRUE@am__EXEEXT_3 = imagetopdf$(EXEEXT) \
+ @ENABLE_IMAGEFILTERS_TRUE@	imagetoraster$(EXEEXT)

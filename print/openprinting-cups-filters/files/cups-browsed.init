@@ -1,0 +1,20 @@
+#!/bin/sh /etc/rc.common
+#
+# Copyright (C) 2005-2016 Weijie Gao <hackpascal@gmail.com>
+#
+
+START=60
+
+start() {
+	prefix=/usr
+	exec_prefix=/usr
+	service_start /usr/sbin/cups-browsed &
+}
+
+stop() {
+	service_stop /usr/sbin/cups-browsed
+}
+
+reload() {
+	service_reload /usr/sbin/cups-browsed &
+}
