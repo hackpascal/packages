@@ -1,0 +1,41 @@
+--- a/base/configure.ac
++++ b/base/configure.ac
+@@ -1942,6 +1942,8 @@
+ AC_SUBST(DBG_CFLAGS)
+ AC_SUBST(GCFLAGS)
+ 
++AC_SUBST(HOSTCC)
++
+ AC_OUTPUT(Makefile)
+ 
+ if ( test -d cups ); then
+--- a/base/Makefile.in
++++ b/base/Makefile.in
+@@ -317,7 +317,7 @@
+ # Define the name of the C compiler (target and host (AUX))
+ 
+ CC=@CC@
+-CCAUX=@CC@
++CCAUX=@HOSTCC@
+ 
+ # Define the name of the linker for the final link step.
+ # Normally this is the same as the C compiler.
+@@ -560,7 +560,7 @@
+ 
+ CCFLAGS=$(GENOPT) $(CAPOPT) $(CFLAGS)
+ CC_=$(CC) $(CCFLAGS)
+-CCAUX_=$(CCAUX) $(CFLAGS) @AUX_SHARED_ZLIB@
++CCAUX_=$(CCAUX) @AUX_SHARED_ZLIB@
+ CC_LEAF=$(CC_)
+ # note gcc can't use -fomit-frame-pointer with -pg.
+ CC_LEAF_PG=$(CC_)
+--- a/configure
++++ b/configure
+@@ -601,6 +601,7 @@
+ 
+ ac_subst_vars='LTLIBOBJS
+ GCFLAGS
++HOSTCC
+ DBG_CFLAGS
+ OPT_CFLAGS
+ AUXDIRPOSTFIX
