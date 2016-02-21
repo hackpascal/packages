@@ -1,0 +1,609 @@
+*PPD-Adobe: "4.3"
+*%
+*%----------------------------------------------------------------------------
+*%  License agreement of ESC/PageS Filter Postscript Printer Description file 
+*%  for EPSON AL-CX11
+*%  Copyright (C) SEIKO EPSON CORPORATION 2004-2006
+*%  Permission is hereby granted for redistribution of this file, provided that
+*%  copyright notice is intact and the contents of this license agreement are 
+*%  not altered in any way from it original form.
+*%
+*%  Permission is hereby granted, free of charge, to any person obtaining
+*%  a copy of this software and associated documentation files (the
+*%  "Software"), to deal in the Software without restriction, including
+*%  without limitation the rights to use, copy, modify, merge, publish,
+*%  distribute, sublicense, and/or sell copies of the Software, and to
+*%  permit persons to whom the Software is furnished to do so, subject to
+*%  the following conditions:
+*%
+*%  The above copyright notice and this permission notice shall be
+*%  included in all copies or substantial portions of the Software.
+*%
+*%  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+*%  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+*%  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+*%  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+*%  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+*%  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+*%  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*%
+*%  [this is the MIT open source license -- see www.opensource.org]
+*%------------------------------------------------------------------------------
+*% Mon Oct 30 13:28:58 2006
+
+*FormatVersion:       "4.3"
+*FileVersion:         "1"
+*LanguageVersion:      English 
+*LanguageEncoding:     ISOLatin1
+*PCFileName:          "ALCX11.PPD"
+*PSVersion:           "(3010.000) 550"
+*PSVersion:           "(3010.000) 651"
+*PSVersion:           "(3010.000) 652"
+*PSVersion:           "(3010.000) 653"
+*PSVersion:           "(3010.000) 704"
+*PSVersion:           "(3010.000) 705"
+*PSVersion:           "(3010.000) 800"
+*Manufacturer:        "Epson"
+*Product:             "(ESC/PageS Filter)"
+*ModelName:           "AL-CX11"
+*ShortNickName:       "ALCX11"
+*NickName:            "EPSON AL-CX11, ESC/PageS Filter"
+
+*%*********** CUPS Configulations ************
+*cupsVersion:          1.1
+*cupsManualCopies:     True
+*cupsModelNumber:      2
+*cupsFilter:          "application/vnd.cups-postscript 0 foomatic-rip"
+
+*%*********** Device Capabilities ************
+*LanguageLevel:       "3"
+*ColorDevice:          True
+*DefaultColorSpace:    RGB
+*FileSystem:           False
+*Throughput:          "1"
+*LandscapeOrientation: Plus90
+*VariablePaperSize:    False
+*TTRasterizer:         Type42
+
+*%*********** Foomatic Configulations ************
+*%pprRIP:        foomatic-rip other
+*FoomaticIDs: Epson-AL-CX11 alcx11
+*FoomaticRIPCommandLine: "pstoalcx11.sh %C"
+
+*%**************** Paper Handling ******************
+
+*OpenUI *PageSize/Paper Size: PickOne
+*OrderDependency: 10 AnySetup *PageSize
+*FoomaticRIPOption PageSize: enum CmdLine C
+*DefaultPageSize: a4
+*PageSize a4/A4:  "%% FoomaticRIPOptionSetting: PageSize=a4"
+*FoomaticRIPOptionSetting PageSize=a4: " PageSize=a4 XY600=4960x7016"
+*PageSize b5/B5:  "%% FoomaticRIPOptionSetting: PageSize=b5"
+*FoomaticRIPOptionSetting PageSize=b5: " PageSize=b5 XY600=4300x6072"
+*PageSize a5/A5:  "%% FoomaticRIPOptionSetting: PageSize=a5"
+*FoomaticRIPOptionSetting PageSize=a5: " PageSize=a5 XY600=3496x4960"
+*PageSize lt/Letter:  "%% FoomaticRIPOptionSetting: PageSize=lt"
+*FoomaticRIPOptionSetting PageSize=lt: " PageSize=lt XY600=5100x6600"
+*PageSize hlt/Half Letter:  "%% FoomaticRIPOptionSetting: PageSize=hlt"
+*FoomaticRIPOptionSetting PageSize=hlt: " PageSize=hlt XY600=3300x5100"
+*PageSize exe/Executive:  "%% FoomaticRIPOptionSetting: PageSize=exe"
+*FoomaticRIPOptionSetting PageSize=exe: " PageSize=exe XY600=4350x6300"
+*PageSize glt/Government Letter:  "%% FoomaticRIPOptionSetting: PageSize=glt"
+*FoomaticRIPOptionSetting PageSize=glt: " PageSize=glt XY600=4800x6300"
+*PageSize lgl/Legal:  "%% FoomaticRIPOptionSetting: PageSize=lgl"
+*FoomaticRIPOptionSetting PageSize=lgl: " PageSize=lgl XY600=5100x8400"
+*PageSize glg/Government Legal:  "%% FoomaticRIPOptionSetting: PageSize=glg"
+*FoomaticRIPOptionSetting PageSize=glg: " PageSize=glg XY600=5100x7800"
+*PageSize f4/F4:  "%% FoomaticRIPOptionSetting: PageSize=f4"
+*FoomaticRIPOptionSetting PageSize=f4: " PageSize=f4 XY600=4960x7796"
+*PageSize mon/Envelope Monarch:  "%% FoomaticRIPOptionSetting: PageSize=mon"
+*FoomaticRIPOptionSetting PageSize=mon: " PageSize=mon XY600=2324x4500 Rotate=90"
+*PageSize ib5/Envelope B5:  "%% FoomaticRIPOptionSetting: PageSize=ib5"
+*FoomaticRIPOptionSetting PageSize=ib5: " PageSize=ib5 XY600=4156x5905"
+*PageSize env10/Envelope #10:  "%% FoomaticRIPOptionSetting: PageSize=env10"
+*FoomaticRIPOptionSetting PageSize=env10: " PageSize=env10 XY600=2474x5700"
+*PageSize envdl/Envelope DL:  "%% FoomaticRIPOptionSetting: PageSize=envdl"
+*FoomaticRIPOptionSetting PageSize=envdl: " PageSize=envdl XY600=2598x5196 Rotate=90"
+*PageSize envc5/Envelope C5:  "%% FoomaticRIPOptionSetting: PageSize=envc5"
+*FoomaticRIPOptionSetting PageSize=envc5: " PageSize=envc5 XY600=3826x5408"
+*PageSize envc6/Envelope C6:  "%% FoomaticRIPOptionSetting: PageSize=envc6"
+*FoomaticRIPOptionSetting PageSize=envc6: " PageSize=envc6 XY600=2692x3826 Rotate=90"
+*CloseUI: *PageSize
+
+*OpenUI *PageRegion/Media Size: PickOne
+*OrderDependency: 10 AnySetup *PageRegion
+*DefaultPageRegion: a4
+*PageRegion a4/A4:                 "<</PageSize[595 842]/ImagingBBox null>>setpagedevice"
+*PageRegion b5/B5:                 "<</PageSize[516 729]/ImagingBBox null>>setpagedevice"
+*PageRegion a5/A5:                 "<</PageSize[420 595]/ImagingBBox null>>setpagedevice"
+*PageRegion lt/Letter:             "<</PageSize[612 792]/ImagingBBox null>>setpagedevice"
+*PageRegion hlt/Half Letter:       "<</PageSize[396 612]/ImagingBBox null>>setpagedevice"
+*PageRegion exe/Executive:         "<</PageSize[522 756]/ImagingBBox null>>setpagedevice"
+*PageRegion glt/Government Letter: "<</PageSize[576 756]/ImagingBBox null>>setpagedevice"
+*PageRegion lgl/Legal:             "<</PageSize[612 1008]/ImagingBBox null>>setpagedevice"
+*PageRegion glg/Government Legal:  "<</PageSize[612 936]/ImagingBBox null>>setpagedevice"
+*PageRegion f4/F4:                 "<</PageSize[595 936]/ImagingBBox null>>setpagedevice"
+*PageRegion mon/Envelope Monarch:  "<</PageSize[279 540]/ImagingBBox null>>setpagedevice"
+*PageRegion ib5/Envelope B5:       "<</PageSize[499 709]/ImagingBBox null>>setpagedevice"
+*PageRegion env10/Envelope #10:    "<</PageSize[297 684]/ImagingBBox null>>setpagedevice"
+*PageRegion envdl/Envelope DL:     "<</PageSize[312 624]/ImagingBBox null>>setpagedevice"
+*PageRegion envc5/Envelope C5:     "<</PageSize[459 649]/ImagingBBox null>>setpagedevice"
+*PageRegion envc6/Envelope C6:     "<</PageSize[323 459]/ImagingBBox null>>setpagedevice"
+*CloseUI: *PageRegion
+
+*DefaultImageableArea: a4
+*ImageableArea a4/A4:                 "0 0 595 842"
+*ImageableArea b5/B5:                 "0 0 516 729"
+*ImageableArea a5/A5:                 "0 0 420 595"
+*ImageableArea lt/Letter:             "0 0 612 792"
+*ImageableArea hlt/Half Letter:       "0 0 396 612"
+*ImageableArea exe/Executive:         "0 0 522 756"
+*ImageableArea glt/Government Letter: "0 0 576 756"
+*ImageableArea lgl/Legal:             "0 0 612 1008"
+*ImageableArea glg/Government Legal:  "0 0 612 936"
+*ImageableArea f4/F4:                 "0 0 595 936"
+*ImageableArea mon/Envelope Monarch:  "0 0 279 540"
+*ImageableArea ib5/Envelope B5:       "0 0 499 709"
+*ImageableArea env10/Envelope #10:    "0 0 297 684"
+*ImageableArea envdl/Envelope DL:     "0 0 312 624"
+*ImageableArea envc5/Envelope C5:     "0 0 459 649"
+*ImageableArea envc6/Envelope C6:     "0 0 323 459"
+
+*DefaultPaperDimension: a4
+*PaperDimension a4/A4:                 "595 842"
+*PaperDimension b5/B5:                 "516 729"
+*PaperDimension a5/A5:                 "420 595"
+*PaperDimension lt/Letter:             "612 792"
+*PaperDimension hlt/Half Letter:       "396 612"
+*PaperDimension exe/Executive:         "522 756"
+*PaperDimension glt/Government Letter: "576 756"
+*PaperDimension lgl/Legal:             "612 1008"
+*PaperDimension glg/Government Legal:  "612 936"
+*PaperDimension f4/F4:                 "595 936"
+*PaperDimension mon/Envelope Monarch:  "279 540"
+*PaperDimension ib5/Envelope B5:       "499 709"
+*PaperDimension env10/Envelope #10:    "297 684"
+*PaperDimension envdl/Envelope DL:     "312 624"
+*PaperDimension envc5/Envelope C5:     "459 649"
+*PaperDimension envc6/Envelope C6:     "323 459"
+
+*%*************** Media type options ***************
+
+*OpenUI *MediaType/Paper Type: PickOne
+*FoomaticRIPOption MediaType: enum CmdLine C
+*OrderDependency: 10 AnySetup *MediaType
+*DefaultMediaType: normal
+*MediaType normal/Plain paper: "%% FoomaticRIPOptionSetting: MediaType=normal"
+*FoomaticRIPOptionSetting MediaType=normal: " MediaType=normal"
+*MediaType semithk/Semi Thick: "%% FoomaticRIPOptionSetting: MediaType=semithk"
+*FoomaticRIPOptionSetting MediaType=semithk: " MediaType=semithk"
+*MediaType lthead/Letterhead: "%% FoomaticRIPOptionSetting: MediaType=lthead"
+*FoomaticRIPOptionSetting MediaType=lthead: " MediaType=lthead"
+*MediaType recycle/Recycle paper: "%% FoomaticRIPOptionSetting: MediaType=recycle"
+*FoomaticRIPOptionSetting MediaType=recycle: " MediaType=recycle"
+*MediaType color/Color paper: "%% FoomaticRIPOptionSetting: MediaType=color"
+*FoomaticRIPOptionSetting MediaType=color: " MediaType=color"
+*MediaType transparency/EPSON OHP Sheet: "%% FoomaticRIPOptionSetting: MediaType=transparency"
+*FoomaticRIPOptionSetting MediaType=transparency: " MediaType=transparency"
+*MediaType thick/Thick paper: "%% FoomaticRIPOptionSetting: MediaType=thick"
+*FoomaticRIPOptionSetting MediaType=thick: " MediaType=thick"
+*MediaType extrathk/Extra Thick: "%% FoomaticRIPOptionSetting: MediaType=extrathk"
+*FoomaticRIPOptionSetting MediaType=extrathk: " MediaType=extrathk"
+*MediaType label/Label paper: "%% FoomaticRIPOptionSetting: MediaType=label"
+*FoomaticRIPOptionSetting MediaType=label: " MediaType=label"
+*MediaType coated/Coated paper: "%% FoomaticRIPOptionSetting: MediaType=coated"
+*FoomaticRIPOptionSetting MediaType=coated: " MediaType=coated"
+*MediaType thick-back/Thick Back: "%% FoomaticRIPOptionSetting: MediaType=thick-back"
+*FoomaticRIPOptionSetting MediaType=thick-back: " MediaType=thick-back"
+*MediaType semithk-back/Semi Thick Back: "%% FoomaticRIPOptionSetting: MediaType=semithk-back"
+*FoomaticRIPOptionSetting MediaType=semithk-back: " MediaType=semithk-back"
+*MediaType extrathk-back/Extra Thick Back: "%% FoomaticRIPOptionSetting: MediaType=extrathk-back"
+*FoomaticRIPOptionSetting MediaType=extrathk-back: " MediaType=extrathk-back"
+*MediaType coated-back/Coated Back: "%% FoomaticRIPOptionSetting: MediaType=coated-back"
+*FoomaticRIPOptionSetting MediaType=coated-back: " MediaType=coated-back"
+*CloseUI: *MediaType
+
+*%********** Printer Features **************
+
+*OpenUI *Color/Color: PickOne
+*FoomaticRIPOption Color: enum CmdLine C
+*OrderDependency: 110 AnySetup *Color
+*DefaultColor: color
+*Color color/Color: "%% FoomaticRIPOptionSetting: Color=color"
+*FoomaticRIPOptionSetting Color=color: " Color=color"
+*Color black/Grayscale: "%% FoomaticRIPOptionSetting: Color=black"
+*FoomaticRIPOptionSetting Color=black: " Color=black"
+*CloseUI: *Color
+
+*OpenUI *TonerSave/Toner Save Mode: Boolean
+*FoomaticRIPOption TonerSave: enum CmdLine C
+*OrderDependency: 10 AnySetup *TonerSave
+*DefaultTonerSave: false
+*TonerSave false/Off: "%% FoomaticRIPOptionSetting: TonerSave=false"
+*FoomaticRIPOptionSetting TonerSave=false: " TonerSave=false"
+*TonerSave true/On: "%% FoomaticRIPOptionSetting: TonerSave=true"
+*FoomaticRIPOptionSetting TonerSave=true: " TonerSave=true"
+*CloseUI: *TonerSave
+
+*%*************** Resolution options ***************
+
+*OpenUI *Resolution/Quality: PickOne
+*FoomaticRIPOption Resolution: enum CmdLine C
+*OrderDependency: 110 AnySetup *Resolution
+*DefaultResolution: 300dpi
+*Resolution 300dpi/Fast: "%% FoomaticRIPOptionSetting: Resolution=300dpi"
+*FoomaticRIPOptionSetting Resolution=300dpi: " Resolution=300dpi"
+*Resolution 600dpi/Fine: "%% FoomaticRIPOptionSetting: Resolution=600dpi"
+*FoomaticRIPOptionSetting Resolution=600dpi: " Resolution=600dpi"
+*CloseUI: *Resolution
+
+*%*************** Media source options ***************
+
+*OpenUI *InputSlot/Paper Source: PickOne
+*FoomaticRIPOption InputSlot: enum CmdLine C
+*OrderDependency: 10 AnySetup *InputSlot
+*DefaultInputSlot: autoselection
+*InputSlot mptray/MP Tray: "%% FoomaticRIPOptionSetting: InputSlot=mptray"
+*FoomaticRIPOptionSetting InputSlot=mptray: " InputSlot=mptray"
+*InputSlot cassette1/Cassette 1: "%% FoomaticRIPOptionSetting: InputSlot=cassette1"
+*FoomaticRIPOptionSetting InputSlot=cassette1: " InputSlot=cassette1"
+*InputSlot autoselection/Auto: "%% FoomaticRIPOptionSetting: InputSlot=autoselection"
+*FoomaticRIPOptionSetting InputSlot=autoselection: " InputSlot=autoselection"
+*CloseUI: *InputSlot
+*%**************** Collate ******************
+
+*OpenUI *Collate/Collate: Boolean
+*FoomaticRIPOption Collate: enum CmdLine C
+*OrderDependency: 10 AnySetup *Collate
+*DefaultCollate: on
+*Collate on/On: "%% FoomaticRIPOptionSetting: Collate=on"
+*FoomaticRIPOptionSetting Collate=on: " Collate=on"
+*Collate off/Off: "%% FoomaticRIPOptionSetting: Collate=off"
+*FoomaticRIPOptionSetting Collate=off: " Collate=off"
+*CloseUI: *Collate
+
+*%**************** Copies ******************
+
+*OpenUI *Copies/Number of copies: PickOne
+*FoomaticRIPOption Copies: enum CmdLine C
+*OrderDependency: 10 AnySetup *Copies
+*DefaultCopies: 1
+*Copies 1: "%% FoomaticRIPOptionSetting: Copies=1"
+*FoomaticRIPOptionSetting Copies=1: " Copies=1"
+*Copies 2: "%% FoomaticRIPOptionSetting: Copies=2"
+*FoomaticRIPOptionSetting Copies=2: " Copies=2"
+*Copies 3: "%% FoomaticRIPOptionSetting: Copies=3"
+*FoomaticRIPOptionSetting Copies=3: " Copies=3"
+*Copies 4: "%% FoomaticRIPOptionSetting: Copies=4"
+*FoomaticRIPOptionSetting Copies=4: " Copies=4"
+*Copies 5: "%% FoomaticRIPOptionSetting: Copies=5"
+*FoomaticRIPOptionSetting Copies=5: " Copies=5"
+*Copies 6: "%% FoomaticRIPOptionSetting: Copies=6"
+*FoomaticRIPOptionSetting Copies=6: " Copies=6"
+*Copies 7: "%% FoomaticRIPOptionSetting: Copies=7"
+*FoomaticRIPOptionSetting Copies=7: " Copies=7"
+*Copies 8: "%% FoomaticRIPOptionSetting: Copies=8"
+*FoomaticRIPOptionSetting Copies=8: " Copies=8"
+*Copies 9: "%% FoomaticRIPOptionSetting: Copies=9"
+*FoomaticRIPOptionSetting Copies=9: " Copies=9"
+*Copies 10: "%% FoomaticRIPOptionSetting: Copies=10"
+*FoomaticRIPOptionSetting Copies=10: " Copies=10"
+*Copies 11: "%% FoomaticRIPOptionSetting: Copies=11"
+*FoomaticRIPOptionSetting Copies=11: " Copies=11"
+*Copies 12: "%% FoomaticRIPOptionSetting: Copies=12"
+*FoomaticRIPOptionSetting Copies=12: " Copies=12"
+*Copies 13: "%% FoomaticRIPOptionSetting: Copies=13"
+*FoomaticRIPOptionSetting Copies=13: " Copies=13"
+*Copies 14: "%% FoomaticRIPOptionSetting: Copies=14"
+*FoomaticRIPOptionSetting Copies=14: " Copies=14"
+*Copies 15: "%% FoomaticRIPOptionSetting: Copies=15"
+*FoomaticRIPOptionSetting Copies=15: " Copies=15"
+*Copies 16: "%% FoomaticRIPOptionSetting: Copies=16"
+*FoomaticRIPOptionSetting Copies=16: " Copies=16"
+*Copies 17: "%% FoomaticRIPOptionSetting: Copies=17"
+*FoomaticRIPOptionSetting Copies=17: " Copies=17"
+*Copies 18: "%% FoomaticRIPOptionSetting: Copies=18"
+*FoomaticRIPOptionSetting Copies=18: " Copies=18"
+*Copies 19: "%% FoomaticRIPOptionSetting: Copies=19"
+*FoomaticRIPOptionSetting Copies=19: " Copies=19"
+*Copies 20: "%% FoomaticRIPOptionSetting: Copies=20"
+*FoomaticRIPOptionSetting Copies=20: " Copies=20"
+*Copies 21: "%% FoomaticRIPOptionSetting: Copies=21"
+*FoomaticRIPOptionSetting Copies=21: " Copies=21"
+*Copies 22: "%% FoomaticRIPOptionSetting: Copies=22"
+*FoomaticRIPOptionSetting Copies=22: " Copies=22"
+*Copies 23: "%% FoomaticRIPOptionSetting: Copies=23"
+*FoomaticRIPOptionSetting Copies=23: " Copies=23"
+*Copies 24: "%% FoomaticRIPOptionSetting: Copies=24"
+*FoomaticRIPOptionSetting Copies=24: " Copies=24"
+*Copies 25: "%% FoomaticRIPOptionSetting: Copies=25"
+*FoomaticRIPOptionSetting Copies=25: " Copies=25"
+*Copies 26: "%% FoomaticRIPOptionSetting: Copies=26"
+*FoomaticRIPOptionSetting Copies=26: " Copies=26"
+*Copies 27: "%% FoomaticRIPOptionSetting: Copies=27"
+*FoomaticRIPOptionSetting Copies=27: " Copies=27"
+*Copies 28: "%% FoomaticRIPOptionSetting: Copies=28"
+*FoomaticRIPOptionSetting Copies=28: " Copies=28"
+*Copies 29: "%% FoomaticRIPOptionSetting: Copies=29"
+*FoomaticRIPOptionSetting Copies=29: " Copies=29"
+*Copies 30: "%% FoomaticRIPOptionSetting: Copies=30"
+*FoomaticRIPOptionSetting Copies=30: " Copies=30"
+*Copies 31: "%% FoomaticRIPOptionSetting: Copies=31"
+*FoomaticRIPOptionSetting Copies=31: " Copies=31"
+*Copies 32: "%% FoomaticRIPOptionSetting: Copies=32"
+*FoomaticRIPOptionSetting Copies=32: " Copies=32"
+*Copies 33: "%% FoomaticRIPOptionSetting: Copies=33"
+*FoomaticRIPOptionSetting Copies=33: " Copies=33"
+*Copies 34: "%% FoomaticRIPOptionSetting: Copies=34"
+*FoomaticRIPOptionSetting Copies=34: " Copies=34"
+*Copies 35: "%% FoomaticRIPOptionSetting: Copies=35"
+*FoomaticRIPOptionSetting Copies=35: " Copies=35"
+*Copies 36: "%% FoomaticRIPOptionSetting: Copies=36"
+*FoomaticRIPOptionSetting Copies=36: " Copies=36"
+*Copies 37: "%% FoomaticRIPOptionSetting: Copies=37"
+*FoomaticRIPOptionSetting Copies=37: " Copies=37"
+*Copies 38: "%% FoomaticRIPOptionSetting: Copies=38"
+*FoomaticRIPOptionSetting Copies=38: " Copies=38"
+*Copies 39: "%% FoomaticRIPOptionSetting: Copies=39"
+*FoomaticRIPOptionSetting Copies=39: " Copies=39"
+*Copies 40: "%% FoomaticRIPOptionSetting: Copies=40"
+*FoomaticRIPOptionSetting Copies=40: " Copies=40"
+*Copies 41: "%% FoomaticRIPOptionSetting: Copies=41"
+*FoomaticRIPOptionSetting Copies=41: " Copies=41"
+*Copies 42: "%% FoomaticRIPOptionSetting: Copies=42"
+*FoomaticRIPOptionSetting Copies=42: " Copies=42"
+*Copies 43: "%% FoomaticRIPOptionSetting: Copies=43"
+*FoomaticRIPOptionSetting Copies=43: " Copies=43"
+*Copies 44: "%% FoomaticRIPOptionSetting: Copies=44"
+*FoomaticRIPOptionSetting Copies=44: " Copies=44"
+*Copies 45: "%% FoomaticRIPOptionSetting: Copies=45"
+*FoomaticRIPOptionSetting Copies=45: " Copies=45"
+*Copies 46: "%% FoomaticRIPOptionSetting: Copies=46"
+*FoomaticRIPOptionSetting Copies=46: " Copies=46"
+*Copies 47: "%% FoomaticRIPOptionSetting: Copies=47"
+*FoomaticRIPOptionSetting Copies=47: " Copies=47"
+*Copies 48: "%% FoomaticRIPOptionSetting: Copies=48"
+*FoomaticRIPOptionSetting Copies=48: " Copies=48"
+*Copies 49: "%% FoomaticRIPOptionSetting: Copies=49"
+*FoomaticRIPOptionSetting Copies=49: " Copies=49"
+*Copies 50: "%% FoomaticRIPOptionSetting: Copies=50"
+*FoomaticRIPOptionSetting Copies=50: " Copies=50"
+*Copies 51: "%% FoomaticRIPOptionSetting: Copies=51"
+*FoomaticRIPOptionSetting Copies=51: " Copies=51"
+*Copies 52: "%% FoomaticRIPOptionSetting: Copies=52"
+*FoomaticRIPOptionSetting Copies=52: " Copies=52"
+*Copies 53: "%% FoomaticRIPOptionSetting: Copies=53"
+*FoomaticRIPOptionSetting Copies=53: " Copies=53"
+*Copies 54: "%% FoomaticRIPOptionSetting: Copies=54"
+*FoomaticRIPOptionSetting Copies=54: " Copies=54"
+*Copies 55: "%% FoomaticRIPOptionSetting: Copies=55"
+*FoomaticRIPOptionSetting Copies=55: " Copies=55"
+*Copies 56: "%% FoomaticRIPOptionSetting: Copies=56"
+*FoomaticRIPOptionSetting Copies=56: " Copies=56"
+*Copies 57: "%% FoomaticRIPOptionSetting: Copies=57"
+*FoomaticRIPOptionSetting Copies=57: " Copies=57"
+*Copies 58: "%% FoomaticRIPOptionSetting: Copies=58"
+*FoomaticRIPOptionSetting Copies=58: " Copies=58"
+*Copies 59: "%% FoomaticRIPOptionSetting: Copies=59"
+*FoomaticRIPOptionSetting Copies=59: " Copies=59"
+*Copies 60: "%% FoomaticRIPOptionSetting: Copies=60"
+*FoomaticRIPOptionSetting Copies=60: " Copies=60"
+*Copies 61: "%% FoomaticRIPOptionSetting: Copies=61"
+*FoomaticRIPOptionSetting Copies=61: " Copies=61"
+*Copies 62: "%% FoomaticRIPOptionSetting: Copies=62"
+*FoomaticRIPOptionSetting Copies=62: " Copies=62"
+*Copies 63: "%% FoomaticRIPOptionSetting: Copies=63"
+*FoomaticRIPOptionSetting Copies=63: " Copies=63"
+*Copies 64: "%% FoomaticRIPOptionSetting: Copies=64"
+*FoomaticRIPOptionSetting Copies=64: " Copies=64"
+*Copies 65: "%% FoomaticRIPOptionSetting: Copies=65"
+*FoomaticRIPOptionSetting Copies=65: " Copies=65"
+*Copies 66: "%% FoomaticRIPOptionSetting: Copies=66"
+*FoomaticRIPOptionSetting Copies=66: " Copies=66"
+*Copies 67: "%% FoomaticRIPOptionSetting: Copies=67"
+*FoomaticRIPOptionSetting Copies=67: " Copies=67"
+*Copies 68: "%% FoomaticRIPOptionSetting: Copies=68"
+*FoomaticRIPOptionSetting Copies=68: " Copies=68"
+*Copies 69: "%% FoomaticRIPOptionSetting: Copies=69"
+*FoomaticRIPOptionSetting Copies=69: " Copies=69"
+*Copies 70: "%% FoomaticRIPOptionSetting: Copies=70"
+*FoomaticRIPOptionSetting Copies=70: " Copies=70"
+*Copies 71: "%% FoomaticRIPOptionSetting: Copies=71"
+*FoomaticRIPOptionSetting Copies=71: " Copies=71"
+*Copies 72: "%% FoomaticRIPOptionSetting: Copies=72"
+*FoomaticRIPOptionSetting Copies=72: " Copies=72"
+*Copies 73: "%% FoomaticRIPOptionSetting: Copies=73"
+*FoomaticRIPOptionSetting Copies=73: " Copies=73"
+*Copies 74: "%% FoomaticRIPOptionSetting: Copies=74"
+*FoomaticRIPOptionSetting Copies=74: " Copies=74"
+*Copies 75: "%% FoomaticRIPOptionSetting: Copies=75"
+*FoomaticRIPOptionSetting Copies=75: " Copies=75"
+*Copies 76: "%% FoomaticRIPOptionSetting: Copies=76"
+*FoomaticRIPOptionSetting Copies=76: " Copies=76"
+*Copies 77: "%% FoomaticRIPOptionSetting: Copies=77"
+*FoomaticRIPOptionSetting Copies=77: " Copies=77"
+*Copies 78: "%% FoomaticRIPOptionSetting: Copies=78"
+*FoomaticRIPOptionSetting Copies=78: " Copies=78"
+*Copies 79: "%% FoomaticRIPOptionSetting: Copies=79"
+*FoomaticRIPOptionSetting Copies=79: " Copies=79"
+*Copies 80: "%% FoomaticRIPOptionSetting: Copies=80"
+*FoomaticRIPOptionSetting Copies=80: " Copies=80"
+*Copies 81: "%% FoomaticRIPOptionSetting: Copies=81"
+*FoomaticRIPOptionSetting Copies=81: " Copies=81"
+*Copies 82: "%% FoomaticRIPOptionSetting: Copies=82"
+*FoomaticRIPOptionSetting Copies=82: " Copies=82"
+*Copies 83: "%% FoomaticRIPOptionSetting: Copies=83"
+*FoomaticRIPOptionSetting Copies=83: " Copies=83"
+*Copies 84: "%% FoomaticRIPOptionSetting: Copies=84"
+*FoomaticRIPOptionSetting Copies=84: " Copies=84"
+*Copies 85: "%% FoomaticRIPOptionSetting: Copies=85"
+*FoomaticRIPOptionSetting Copies=85: " Copies=85"
+*Copies 86: "%% FoomaticRIPOptionSetting: Copies=86"
+*FoomaticRIPOptionSetting Copies=86: " Copies=86"
+*Copies 87: "%% FoomaticRIPOptionSetting: Copies=87"
+*FoomaticRIPOptionSetting Copies=87: " Copies=87"
+*Copies 88: "%% FoomaticRIPOptionSetting: Copies=88"
+*FoomaticRIPOptionSetting Copies=88: " Copies=88"
+*Copies 89: "%% FoomaticRIPOptionSetting: Copies=89"
+*FoomaticRIPOptionSetting Copies=89: " Copies=89"
+*Copies 90: "%% FoomaticRIPOptionSetting: Copies=90"
+*FoomaticRIPOptionSetting Copies=90: " Copies=90"
+*Copies 91: "%% FoomaticRIPOptionSetting: Copies=91"
+*FoomaticRIPOptionSetting Copies=91: " Copies=91"
+*Copies 92: "%% FoomaticRIPOptionSetting: Copies=92"
+*FoomaticRIPOptionSetting Copies=92: " Copies=92"
+*Copies 93: "%% FoomaticRIPOptionSetting: Copies=93"
+*FoomaticRIPOptionSetting Copies=93: " Copies=93"
+*Copies 94: "%% FoomaticRIPOptionSetting: Copies=94"
+*FoomaticRIPOptionSetting Copies=94: " Copies=94"
+*Copies 95: "%% FoomaticRIPOptionSetting: Copies=95"
+*FoomaticRIPOptionSetting Copies=95: " Copies=95"
+*Copies 96: "%% FoomaticRIPOptionSetting: Copies=96"
+*FoomaticRIPOptionSetting Copies=96: " Copies=96"
+*Copies 97: "%% FoomaticRIPOptionSetting: Copies=97"
+*FoomaticRIPOptionSetting Copies=97: " Copies=97"
+*Copies 98: "%% FoomaticRIPOptionSetting: Copies=98"
+*FoomaticRIPOptionSetting Copies=98: " Copies=98"
+*Copies 99: "%% FoomaticRIPOptionSetting: Copies=99"
+*FoomaticRIPOptionSetting Copies=99: " Copies=99"
+*Copies 100: "%% FoomaticRIPOptionSetting: Copies=100"
+*FoomaticRIPOptionSetting Copies=100: " Copies=100"
+*CloseUI: *Copies
+
+
+*%********** UI Constraints **************
+
+*UIConstraints:	*PageSize a5 *InputSlot autoselection
+*UIConstraints:	*PageSize a5 *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize a5
+*UIConstraints:	*InputSlot cassette1     *PageSize a5
+*UIConstraints:	*PageSize b5 *InputSlot autoselection
+*UIConstraints:	*PageSize b5 *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize b5
+*UIConstraints:	*InputSlot cassette1     *PageSize b5
+*UIConstraints:	*PageSize hlt *InputSlot autoselection
+*UIConstraints:	*PageSize hlt *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize hlt
+*UIConstraints:	*InputSlot cassette1     *PageSize hlt
+*UIConstraints:	*PageSize exe *InputSlot autoselection
+*UIConstraints:	*PageSize exe *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize exe
+*UIConstraints:	*InputSlot cassette1     *PageSize exe
+*UIConstraints:	*PageSize glt *InputSlot autoselection
+*UIConstraints:	*PageSize glt *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize glt
+*UIConstraints:	*InputSlot cassette1     *PageSize glt
+*UIConstraints:	*PageSize lgl *InputSlot autoselection
+*UIConstraints:	*PageSize lgl *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize lgl
+*UIConstraints:	*InputSlot cassette1     *PageSize lgl
+*UIConstraints:	*PageSize glg *InputSlot autoselection
+*UIConstraints:	*PageSize glg *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize glg
+*UIConstraints:	*InputSlot cassette1     *PageSize glg
+*UIConstraints:	*PageSize f4 *InputSlot autoselection
+*UIConstraints:	*PageSize f4 *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize f4
+*UIConstraints:	*InputSlot cassette1     *PageSize f4
+*UIConstraints:	*PageSize mon *InputSlot autoselection
+*UIConstraints:	*PageSize mon *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize mon
+*UIConstraints:	*InputSlot cassette1     *PageSize mon
+*UIConstraints:	*PageSize env10 *InputSlot autoselection
+*UIConstraints:	*PageSize env10 *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize env10
+*UIConstraints:	*InputSlot cassette1     *PageSize env10
+*UIConstraints:	*PageSize envc5 *InputSlot autoselection
+*UIConstraints:	*PageSize envc5 *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize envc5
+*UIConstraints:	*InputSlot cassette1     *PageSize envc5
+*UIConstraints:	*PageSize ib5 *InputSlot autoselection
+*UIConstraints:	*PageSize ib5 *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize ib5
+*UIConstraints:	*InputSlot cassette1     *PageSize ib5
+*UIConstraints:	*PageSize envdl *InputSlot autoselection
+*UIConstraints:	*PageSize envdl *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize envdl
+*UIConstraints:	*InputSlot cassette1     *PageSize envdl
+*UIConstraints:	*PageSize envc6 *InputSlot autoselection
+*UIConstraints:	*PageSize envc6 *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *PageSize envc6
+*UIConstraints:	*InputSlot cassette1     *PageSize envc6
+
+*UIConstraints:	*MediaType transparency *InputSlot autoselection
+*UIConstraints:	*MediaType transparency *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *MediaType transparency
+*UIConstraints:	*InputSlot cassette1     *MediaType transparency
+*UIConstraints:	*MediaType label *InputSlot autoselection
+*UIConstraints:	*MediaType label *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *MediaType label
+*UIConstraints:	*InputSlot cassette1     *MediaType label
+*UIConstraints:	*MediaType thick *InputSlot autoselection
+*UIConstraints:	*MediaType thick *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *MediaType thick
+*UIConstraints:	*InputSlot cassette1     *MediaType thick
+*UIConstraints:	*MediaType extrathk *InputSlot autoselection
+*UIConstraints:	*MediaType extrathk *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *MediaType extrathk
+*UIConstraints:	*InputSlot cassette1     *MediaType extrathk
+*UIConstraints:	*MediaType coated *InputSlot autoselection
+*UIConstraints:	*MediaType coated *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *MediaType coated
+*UIConstraints:	*InputSlot cassette1     *MediaType coated
+*UIConstraints:	*MediaType thick-back *InputSlot autoselection
+*UIConstraints:	*MediaType thick-back *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *MediaType thick-back
+*UIConstraints:	*InputSlot cassette1     *MediaType thick-back
+*UIConstraints:	*MediaType extrathk-back *InputSlot autoselection
+*UIConstraints:	*MediaType extrathk-back *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *MediaType extrathk-back
+*UIConstraints:	*InputSlot cassette1     *MediaType extrathk-back
+*UIConstraints:	*MediaType semithk-back *InputSlot autoselection
+*UIConstraints:	*MediaType semithk-back *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *MediaType semithk-back
+*UIConstraints:	*InputSlot cassette1     *MediaType semithk-back
+*UIConstraints:	*MediaType coated-back *InputSlot autoselection
+*UIConstraints:	*MediaType coated-back *InputSlot cassette1
+*UIConstraints:	*InputSlot autoselection *MediaType coated-back
+*UIConstraints:	*InputSlot cassette1     *MediaType coated-back
+*%********** Fonts **************
+
+*DefaultFont: Courier
+*Font AvantGarde-Book: Standard (001.006S) Standard ROM
+*Font AvantGarde-BookOblique: Standard (001.006S) Standard ROM
+*Font AvantGarde-Demi: Standard (001.007S) Standard ROM
+*Font AvantGarde-DemiOblique: Standard (001.007S) Standard ROM
+*Font Bookman-Demi: Standard (001.004S) Standard ROM
+*Font Bookman-DemiItalic: Standard (001.004S) Standard ROM
+*Font Bookman-Light: Standard (001.004S) Standard ROM
+*Font Bookman-LightItalic: Standard (001.004S) Standard ROM
+*Font Courier: Standard (002.004S) Standard ROM
+*Font Courier-Bold: Standard (002.004S) Standard ROM
+*Font Courier-BoldOblique: Standard (002.004S) Standard ROM
+*Font Courier-Oblique: Standard (002.004S) Standard ROM
+*Font Helvetica: Standard (001.006S) Standard ROM
+*Font Helvetica-Bold: Standard (001.007S) Standard ROM
+*Font Helvetica-BoldOblique: Standard (001.007S) Standard ROM
+*Font Helvetica-Narrow: Standard (001.006S) Standard ROM
+*Font Helvetica-Narrow-Bold: Standard (001.007S) Standard ROM
+*Font Helvetica-Narrow-BoldOblique: Standard (001.007S) Standard ROM
+*Font Helvetica-Narrow-Oblique: Standard (001.006S) Standard ROM
+*Font Helvetica-Oblique: Standard (001.006S) Standard ROM
+*Font NewCenturySchlbk-Bold: Standard (001.009S) Standard ROM
+*Font NewCenturySchlbk-BoldItalic: Standard (001.007S) Standard ROM
+*Font NewCenturySchlbk-Italic: Standard (001.006S) Standard ROM
+*Font NewCenturySchlbk-Roman: Standard (001.007S) Standard ROM
+*Font Palatino-Bold: Standard (001.005S) Standard ROM
+*Font Palatino-BoldItalic: Standard (001.005S) Standard ROM
+*Font Palatino-Italic: Standard (001.005S) Standard ROM
+*Font Palatino-Roman: Standard (001.005S) Standard ROM
+*Font Symbol: Special (001.007S) Special ROM
+*Font Times-Bold: Standard (001.007S) Standard ROM
+*Font Times-BoldItalic: Standard (001.009S) Standard ROM
+*Font Times-Italic: Standard (001.007S) Standard ROM
+*Font Times-Roman: Standard (001.007S) Standard ROM
+*Font ZapfChancery-MediumItalic: Standard (001.007S) Standard ROM
+*Font ZapfDingbats: Special (001.004S) Standard ROM
+
+
+*% End of ESC/PageS Filter PPD file for EPSON AL-CX11
