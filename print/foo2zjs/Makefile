@@ -63,6 +63,19 @@ define Package/foo2zjs/install
 	$(INSTALL_DIR) $(1)/usr/lib/cups/filter
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/command2foo2lava-pjl $(1)/usr/lib/cups/filter
 
+	for vendor in Dell Epson HP Kyocera Lexmark Minolta Oki Olivetti Samsung Xerox; do \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/$$$$vendor; \
+		$(CP) $(PKG_BUILD_DIR)/PPD/$$$$vendor-*.ppd $(1)/usr/share/ppd/$$$$vendor/; \
+	done
+
+	$(INSTALL_DIR) $(1)/usr/share/ppd/FujiXerox
+	$(CP) $(PKG_BUILD_DIR)/PPD/Fuji_Xerox-*.ppd $(1)/usr/share/ppd/FujiXerox/
+
+	$(INSTALL_DIR) $(1)/usr/share/ppd/Konika
+	$(CP) $(PKG_BUILD_DIR)/PPD/KONICA_MINOLTA-*.ppd $(1)/usr/share/ppd/Konika/
+
+	$(CP) $(PKG_BUILD_DIR)/PPD/Generic-*.ppd $(1)/usr/share/ppd/
+
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/foo2zjs-set-cups-filter-permission $(1)/etc/uci-defaults/
 endef
