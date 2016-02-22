@@ -1,0 +1,16 @@
+diff -Nur a/Makefile b/Makefile
+--- a/Makefile	2016-02-22 17:28:18.000000000 +0800
++++ b/Makefile	2016-02-22 17:30:56.164191029 +0800
+@@ -5,10 +5,10 @@
+ all:	carps-decode rastertocarps ppd/*.ppd
+ 
+ carps-decode:	carps-decode.c carps.h
+-	gcc $(CFLAGS) carps-decode.c -o carps-decode
++	$(CC) $(CFLAGS) $(LDFLAGS) carps-decode.c -o carps-decode
+ 
+ rastertocarps:	rastertocarps.c carps.h
+-	gcc $(CFLAGS) rastertocarps.c -o rastertocarps -lcupsimage -lcups
++	$(CC) $(CFLAGS) $(LDFLAGS) rastertocarps.c -o rastertocarps -lcupsimage -lcups
+ 
+ ppd/*.ppd: carps.drv
+ 	ppdc carps.drv
