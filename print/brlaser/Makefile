@@ -44,6 +44,11 @@ define Package/brlaser/install
 	$(INSTALL_DIR) $(1)/usr/share/cups/drv
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/share/cups/drv/brlaser.drv $(1)/usr/share/cups/drv/
 
+	(cd $(PKG_BUILD_DIR) && ppdc brlaser.drv)
+
+	$(INSTALL_DIR) $(1)/usr/share/ppd/Brother
+	$(CP) $(PKG_BUILD_DIR)/ppd/*.ppd $(1)/usr/share/ppd/Brother
+
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/brlaser-set-cups-filter-permission $(1)/etc/uci-defaults/
 endef
