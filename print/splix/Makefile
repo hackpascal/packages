@@ -40,12 +40,32 @@ define Build/Configure
 endef
 
 define Build/Compile
-	$(MAKE) -C $(PKG_BUILD_DIR) all
+	$(MAKE_VARS) $(MAKE) -C $(PKG_BUILD_DIR) $(MAKE_FLAGS) all
+	$(MAKE_VARS) $(MAKE) -C $(PKG_BUILD_DIR)/ppd $(MAKE_FLAGS) all	
+endef
+
+define Build/Install
+	$(MAKE_VARS) $(MAKE) -C $(PKG_BUILD_DIR) $(MAKE_INSTALL_FLAGS) install
 endef
 
 define Package/splix/install
 	$(INSTALL_DIR) $(1)/usr/lib/cups/filter
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/optimized/{pstoqpdl,rastertoqpdl} $(1)/usr/lib/cups/filter/
+
+	$(INSTALL_DIR) $(1)/usr/share/ppd/Dell
+	$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/dell/*.ppd $(1)/usr/share/ppd/Dell
+
+	$(INSTALL_DIR) $(1)/usr/share/ppd/Lexmark
+	$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/lexmark/*.ppd $(1)/usr/share/ppd/Lexmark
+
+	$(INSTALL_DIR) $(1)/usr/share/ppd/Samsung
+	$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/samsung/*.ppd $(1)/usr/share/ppd/Samsung
+
+	$(INSTALL_DIR) $(1)/usr/share/ppd/Toshiba
+	$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/toshiba/*.ppd $(1)/usr/share/ppd/Toshiba
+
+	$(INSTALL_DIR) $(1)/usr/share/ppd/Xerox
+	$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/xerox/*.ppd $(1)/usr/share/ppd/Xerox
 
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/splix-set-cups-filters-permission $(1)/etc/uci-defaults/
