@@ -1,0 +1,17 @@
+#!/bin/sh
+
+subdirs="pstoufr2cpca"
+
+arg_pass=
+
+for arg in "$@"; do
+	arg_pass="$arg_pass $arg"
+done
+
+for dir in $subdirs; do
+	NOCONFIGURE=1 ./$dir/autogen.sh 
+	(cd "$dir" && ./configure $arg_pass)
+done
+
+exit 0
+
