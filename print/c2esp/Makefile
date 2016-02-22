@@ -23,7 +23,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/c2esp
   SECTION:=print
   CATEGORY:=Printing and Imaging
-  TITLE:=CUPS driver for kodak Aio
+  TITLE:=CUPS driver for Kodak Aio
   URL:=http://sourceforge.net/projects/cupsdriverkodak/
   DEPENDS:=+libcupsfilters +libcupsimage +libjbig85
 endef
@@ -43,6 +43,9 @@ define Package/c2esp/install
 
 	$(INSTALL_DIR) $(1)/usr/share/cups/drv/c2esp
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/share/cups/drv/c2esp/* $(1)/usr/share/cups/drv/c2esp/
+
+	$(INSTALL_DIR) $(1)/usr/share/ppd/Kodak
+	$(CP) $(PKG_BUILD_DIR)/ppd/*.ppd $(1)/usr/share/ppd/Kodak
 
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/c2esp-set-cups-filters-permission $(1)/etc/uci-defaults/
