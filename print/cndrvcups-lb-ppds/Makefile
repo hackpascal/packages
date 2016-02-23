@@ -39,8 +39,8 @@ define Build/Compile
 endef
 
 define Package/cndrvcups-lb-ppds/install
-	$(INSTALL_DIR) $(1)/usr/share/ppds/Canon
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.ppd $(1)/usr/share/ppds/Canon
+	$(INSTALL_DIR) $(1)/usr/share/ppd/Canon
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.ppd $(1)/usr/share/ppd/Canon
 endef
 
 $(eval $(call BuildPackage,cndrvcups-lb-ppds))
