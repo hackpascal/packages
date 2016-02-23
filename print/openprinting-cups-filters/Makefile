@@ -27,7 +27,7 @@ define Package/openprinting-cups-filters
   SECTION:=print
   CATEGORY:=Printing and Imaging
   TITLE:=OpenPrinting CUPS filters
-  DEPENDS:=+libcups +libcupsimage +libcupsfilters +libfontembed +libfontconfig +glib2 +libijs +libpoppler +libqpdf
+  DEPENDS:=+libcups +libcupsimage +libcupsfilters +libfontembed +libfontconfig +glib2 +libijs +libpoppler +libqpdf +ghostscript
   URL:=http://www.openprinting.org
 endef
 
