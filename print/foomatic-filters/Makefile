@@ -22,6 +22,7 @@ define Package/foomatic-filters
   CATEGORY:=Printing and Imaging
   TITLE:=Foomatic printing filters
   MAINTAINER:=Weijie Gao <hackpascal@gmail.com>
+  DEPENDS:=+ghostscript
   URL:=https://www.openprinting.org/
 endef
 
