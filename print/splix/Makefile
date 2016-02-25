@@ -32,6 +32,13 @@ define Package/splix/description
   Splix is a driver for printers that speak SPL (Samsung Printer Language). This includes printers made by Samsung, Dell, and Xerox
 endef
 
+define Package/splix/config
+config SPLIX_PPDS_COMPILE
+	bool "Compile ppd files"
+	depends on PACKAGE_splix
+	default n
+endef
+
 define Build/Configure
 	$(SED) "s/^CC\t\t:= gcc/CC\t\t:= $(TARGET_CC)/" -e "s/^CXX\t\t:= g++/CXX\t\t:= $(TARGET_CXX)/" -e "s/^AR\t\t:= ar/AR\t\t:= $(TARGET_AR)/" $(PKG_BUILD_DIR)/Makefile
 	$(SED) 's|\(.*\)toqpdl_LDFLAGS\t*:=.*|\1toqpdl_LDFLAGS\t:=$(TARGET_LDFLAGS) -lpthread|' -e 's|\(.*\)toqpdl_LIBS\t*:=.*|\1toqpdl_LIBS\t:=-lpng -ltiff -lcups -lcupsimage -ljbig85|' -e 's|^CXXFLAGS\t\t+= `cups.*|CXXFLAGS\t\t+= $(TARGET_CFLAGS) -Iinclude -Wall $(TARGET_CPPFLAGS)|' -e 's|CUPSFILTER\t*:=.*|CUPSFILTER\t:= /usr/lib/cups/filter|' -e 's|CUPSPPD\t*:=.*|CUPSPPD\t:= /usr/share/cups/model|' $(PKG_BUILD_DIR)/module.mk
@@ -46,26 +53,31 @@ endef
 
 define Build/Install
 	$(MAKE_VARS) $(MAKE) -C $(PKG_BUILD_DIR) $(MAKE_INSTALL_FLAGS) install
+
+	if [ x$(CONFIG_SPLIX_PPDS_COMPILE) = xy ]; then \
+		ppdbc $(PKG_INSTALL_DIR)/usr/share/cups/model/ $(PKG_BUILD_DIR)/splix-ppds.ppdb; \
+	fi
 endef
 
 define Package/splix/install
 	$(INSTALL_DIR) $(1)/usr/lib/cups/filter
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/optimized/{pstoqpdl,rastertoqpdl} $(1)/usr/lib/cups/filter/
 
-	$(INSTALL_DIR) $(1)/usr/share/ppd/Dell
-	$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/dell/*.ppd $(1)/usr/share/ppd/Dell
-
-	$(INSTALL_DIR) $(1)/usr/share/ppd/Lexmark
-	$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/lexmark/*.ppd $(1)/usr/share/ppd/Lexmark
-
-	$(INSTALL_DIR) $(1)/usr/share/ppd/Samsung
-	$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/samsung/*.ppd $(1)/usr/share/ppd/Samsung
-
-	$(INSTALL_DIR) $(1)/usr/share/ppd/Toshiba
-	$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/toshiba/*.ppd $(1)/usr/share/ppd/Toshiba
-
-	$(INSTALL_DIR) $(1)/usr/share/ppd/Xerox
-	$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/xerox/*.ppd $(1)/usr/share/ppd/Xerox
+	if [ x$(CONFIG_SPLIX_PPDS_COMPILE) = xy ]; then \
+		$(INSTALL_DIR) $(1)/usr/lib/cups/driver; \
+		$(INSTALL_BIN) $(PKG_BUILD_DIR)/splix-ppds.ppdb $(1)/usr/lib/cups/driver/splix-ppds; \
+	else \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/Dell; \
+		$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/dell/*.ppd $(1)/usr/share/ppd/Dell; \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/Lexmark; \
+		$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/lexmark/*.ppd $(1)/usr/share/ppd/Lexmark; \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/Samsung; \
+		$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/samsung/*.ppd $(1)/usr/share/ppd/Samsung; \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/Toshiba; \
+		$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/toshiba/*.ppd $(1)/usr/share/ppd/Toshiba; \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/Xerox; \
+		$(CP) $(PKG_INSTALL_DIR)/usr/share/cups/model/xerox/*.ppd $(1)/usr/share/ppd/Xerox; \
+	fi
 
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/splix-set-cups-filters-permission $(1)/etc/uci-defaults/
