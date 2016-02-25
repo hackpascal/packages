@@ -32,15 +32,36 @@ define Package/cndrvcups-lb-ppds/description
   PPD files for Canon UFR II/ UFRII LT Printers
 endef
 
+define Package/cndrvcups-lb-ppds/config
+config CNDRVCUPS_LB_PPDS_COMPILE
+	bool "Compile ppd files"
+	depends on PACKAGE_cndrvcups-lb-ppds
+	default n
+endef
+
 define Build/Configure
 endef
 
 define Build/Compile
 endef
 
+define Build/Install
+	$(INSTALL_DIR) $(PKG_BUILD_DIR)/tmp-ppds/Canon
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.ppd $(PKG_BUILD_DIR)/tmp-ppds/Canon
+
+	if [ x$(CONFIG_CNDRVCUPS_LB_PPDS_COMPILE) = xy ]; then \
+		ppdbc $(PKG_BUILD_DIR)/tmp-ppds $(PKG_BUILD_DIR)/cndrvcups-lb-ppds.ppdb; \
+	fi
+endef
+
 define Package/cndrvcups-lb-ppds/install
-	$(INSTALL_DIR) $(1)/usr/share/ppd/Canon
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.ppd $(1)/usr/share/ppd/Canon
+	if [ x$(CONFIG_CNDRVCUPS_LB_PPDS_COMPILE) = xy ]; then \
+		$(INSTALL_DIR) $(1)/usr/lib/cups/driver; \
+		$(INSTALL_BIN) $(PKG_BUILD_DIR)/cndrvcups-lb-ppds.ppdb $(1)/usr/lib/cups/driver/cndrvcups-lb-ppds; \
+	else \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/Canon; \
+		$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.ppd $(1)/usr/share/ppd/Canon; \
+	fi
 endef
 
 $(eval $(call BuildPackage,cndrvcups-lb-ppds))
