@@ -42,6 +42,20 @@ endef
 
 Package/openprinting-ppds/description=$(Package/foomatic-db-ppds/description)
 
+define Package/foomatic-db-ppds/config
+config FOOMATIC_DB_PPDS_COMPILE
+	bool "Compile ppd files"
+	depends on PACKAGE_foomatic-db-ppds
+	default n
+endef
+
+define Package/openprinting-ppds/config
+config OPENPRINTING_PPDS_COMPILE
+	bool "Compile ppd files"
+	depends on PACKAGE_openprinting-ppds
+	default n
+endef
+
 CONFIGURE_ARGS += \
 	--with-drivers=NOOBSOLETES,NOEMPTYCMDLINE
 
@@ -64,16 +78,34 @@ define Build/Install
 
 	# Build PPD files
 	FOOMATICDB=$(PKG_INSTALL_DIR)/usr/share/foomatic foomatic-compiledb -f -j `grep -c '^processor' /proc/cpuinfo` -t ppd -d $(PKG_BUILD_DIR)/ppds-foomatic-db `ls -1 $(PKG_INSTALL_DIR)/usr/share/foomatic/db/source/driver/*.xml | perl -p -e 's:^.*db/source/driver/(\S*)\.xml\s*$$:\1\n:'`
+
+	if [ x$(CONFIG_FOOMATIC_DB_PPDS_COMPILE) = xy ]; then \
+		ppdbc $(PKG_BUILD_DIR)/ppds-foomatic-db $(PKG_BUILD_DIR)/foomatic-db-ppds.ppdb; \
+	fi
+
+	if [ x$(CONFIG_OPENPRINTING_PPDS_COMPILE) = xy ]; then \
+		ppdbc $(PKG_BUILD_DIR)/ppds-openprinting $(PKG_BUILD_DIR)/openprinting-ppds.ppdb; \
+	fi
 endef
 
 define Package/foomatic-db-ppds/install
-	$(INSTALL_DIR) $(1)/usr/share/ppd
-	$(CP) -a $(PKG_BUILD_DIR)/ppds-foomatic-db/* $(1)/usr/share/ppd
+	if [ x$(CONFIG_FOOMATIC_DB_PPDS_COMPILE) = xy ]; then \
+		$(INSTALL_DIR) $(1)/usr/lib/cups/driver; \
+		$(INSTALL_BIN) $(PKG_BUILD_DIR)/foomatic-db-ppds.ppdb $(1)/usr/lib/cups/driver/foomatic-db-ppds; \
+	else \
+		$(INSTALL_DIR) $(1)/usr/share/ppd; \
+		$(CP) -a $(PKG_BUILD_DIR)/ppds-foomatic-db/* $(1)/usr/share/ppd; \
+	fi
 endef
 
 define Package/openprinting-ppds/install
-	$(INSTALL_DIR) $(1)/usr/share/ppd
-	$(CP) -a $(PKG_BUILD_DIR)/ppds-openprinting/* $(1)/usr/share/ppd
+	if [ x$(CONFIG_OPENPRINTING_PPDS_COMPILE) = xy ]; then \
+		$(INSTALL_DIR) $(1)/usr/lib/cups/driver; \
+		$(INSTALL_BIN) $(PKG_BUILD_DIR)/openprinting-ppds.ppdb $(1)/usr/lib/cups/driver/openprinting-ppds; \
+	else \
+		$(INSTALL_DIR) $(1)/usr/share/ppd; \
+		$(CP) -a $(PKG_BUILD_DIR)/ppds-openprinting/* $(1)/usr/share/ppd; \
+	fi
 endef
 
 $(eval $(call BuildPackage,foomatic-db-ppds))
