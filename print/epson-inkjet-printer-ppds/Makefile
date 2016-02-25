@@ -30,15 +30,36 @@ define Package/epson-inkjet-printer-ppds/description
   PPD files for Epson Inkjet printer driver
 endef
 
+define Package/epson-inkjet-printer-ppds/config
+config EPSON_INKJET_PRINTER_PPDS_COMPILE
+	bool "Compile ppd files"
+	depends on PACKAGE_epson-inkjet-printer-ppds
+	default n
+endef
+
 define Build/Configure
 endef
 
 define Build/Compile
 endef
 
+define Build/Install
+	$(INSTALL_DIR) $(PKG_BUILD_DIR)/tmp-ppds/Epson
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.ppd $(PKG_BUILD_DIR)/tmp-ppds/Epson
+
+	if [ x$(CONFIG_EPSON_INKJET_PRINTER_PPDS_COMPILE) = xy ]; then \
+		ppdbc $(PKG_BUILD_DIR)/tmp-ppds $(PKG_BUILD_DIR)/epson-inkjet-printer-ppds.ppdb; \
+	fi
+endef
+
 define Package/epson-inkjet-printer-ppds/install
-	$(INSTALL_DIR) $(1)/usr/share/ppds/Epson
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.ppd $(1)/usr/share/ppds/Epson
+	if [ x$(CONFIG_EPSON_INKJET_PRINTER_PPDS_COMPILE) = xy ]; then \
+		$(INSTALL_DIR) $(1)/usr/lib/cups/driver; \
+		$(INSTALL_BIN) $(PKG_BUILD_DIR)/epson-inkjet-printer-ppds.ppdb $(1)/usr/lib/cups/driver/epson-inkjet-printer-ppds; \
+	else \
+		$(INSTALL_DIR) $(1)/usr/share/ppds/Epson; \
+		$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.ppd $(1)/usr/share/ppds/Epson; \
+	fi
 endef
 
 $(eval $(call BuildPackage,epson-inkjet-printer-ppds))
