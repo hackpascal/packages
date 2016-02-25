@@ -104,6 +104,13 @@ define Package/libhpmud/description
   HP multi-point transport driver
 endef
 
+define Package/hplip-cups/config
+config HPLIP_PPDS_COMPILE
+	bool "Compile ppd files"
+	depends on PACKAGE_hplip-cups
+	default n
+endef
+
 CONFIGURE_ARGS += \
 	_python_sysroot="$(STAGING_DIR)" \
 	_python_prefix="/usr" \
@@ -122,6 +129,20 @@ CONFIGURE_ARGS += \
 	--disable-policykit \
 	--with-cupsbackenddir=/usr/lib/cups/backend \
 	--with-cupsfilterdir=/usr/lib/cups/filter
+
+define Build/Install
+	$(call Build/Install/Default)
+
+	$(INSTALL_DIR) $(PKG_BUILD_DIR)/tmp-ppds/HP
+
+	for f in $$$$(ls $(PKG_INSTALL_DIR)/usr/share/ppd/HP/); do \
+		gzip -c -d $(PKG_INSTALL_DIR)/usr/share/ppd/HP/$$$$f > $(PKG_BUILD_DIR)/tmp-ppds/HP/$$$${f%.gz}; \
+	done
+
+	if [ x$(CONFIG_HPLIP_PPDS_COMPILE) = xy ]; then \
+		ppdbc $(PKG_BUILD_DIR)/tmp-ppds $(PKG_BUILD_DIR)/hplip.ppdb; \
+	fi
+endef
 
 define Package/hplip-sane/install
 	$(INSTALL_DIR) $(1)/etc/sane.d
@@ -145,10 +166,13 @@ define Package/hplip-cups/install
 endef
 
 define Package/hplip-ppds/install
-	$(INSTALL_DIR) $(1)/usr/share/ppd/HP
-	for f in $$$$(ls $(PKG_INSTALL_DIR)/usr/share/ppd/HP/); do \
-		gzip -c -d $(PKG_INSTALL_DIR)/usr/share/ppd/HP/$$$$f > $(1)/usr/share/ppd/HP/$$$${f%.gz}; \
-	done
+	if [ x$(CONFIG_HPLIP_PPDS_COMPILE) = xy ]; then \
+		$(INSTALL_DIR) $(1)/usr/lib/cups/driver; \
+		$(INSTALL_BIN) $(PKG_BUILD_DIR)/hplip.ppdb $(1)/usr/lib/cups/driver/hplip; \
+	else \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/HP; \
+		$(CP) -a $(PKG_INSTALL_DIR)/usr/share/ppd/HP/*.ppd $(1)/usr/share/ppd/HP; \
+	fi
 endef
 
 define Package/libhpip/install
