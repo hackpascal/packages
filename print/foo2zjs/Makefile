@@ -43,6 +43,19 @@ define Package/foo2zjs/description
   protocols that are in use today, such as Postscript, PCL, Epson, etc.
 endef
 
+define Package/foo2zjs/config
+config FOO2ZJS_PPDS_COMPILE
+	bool "Compile ppd files"
+	depends on PACKAGE_foo2zjs
+	default n
+endef
+
+define Build/Install
+	if [ x$(CONFIG_FOO2ZJS_PPDS_COMPILE) = xy ]; then \
+		ppdbc $(PKG_BUILD_DIR)/PPD $(PKG_BUILD_DIR)/foo2zjs-ppds.ppdb; \
+	fi
+endef
+
 define Package/foo2zjs/install
 	$(INSTALL_DIR) $(1)/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/usb_printerid $(1)/bin
@@ -63,18 +76,20 @@ define Package/foo2zjs/install
 	$(INSTALL_DIR) $(1)/usr/lib/cups/filter
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/command2foo2lava-pjl $(1)/usr/lib/cups/filter
 
-	for vendor in Dell Epson HP Kyocera Lexmark Minolta Oki Olivetti Samsung Xerox; do \
-		$(INSTALL_DIR) $(1)/usr/share/ppd/$$$$vendor; \
-		$(CP) $(PKG_BUILD_DIR)/PPD/$$$$vendor-*.ppd $(1)/usr/share/ppd/$$$$vendor/; \
-	done
-
-	$(INSTALL_DIR) $(1)/usr/share/ppd/FujiXerox
-	$(CP) $(PKG_BUILD_DIR)/PPD/Fuji_Xerox-*.ppd $(1)/usr/share/ppd/FujiXerox/
-
-	$(INSTALL_DIR) $(1)/usr/share/ppd/Konika
-	$(CP) $(PKG_BUILD_DIR)/PPD/KONICA_MINOLTA-*.ppd $(1)/usr/share/ppd/Konika/
-
-	$(CP) $(PKG_BUILD_DIR)/PPD/Generic-*.ppd $(1)/usr/share/ppd/
+	if [ x$(CONFIG_FOO2ZJS_PPDS_COMPILE) = xy ]; then \
+		$(INSTALL_DIR) $(1)/usr/lib/cups/driver; \
+		$(INSTALL_BIN) $(PKG_BUILD_DIR)/foo2zjs-ppds.ppdb $(1)/usr/lib/cups/driver/foo2zjs-ppds; \
+	else \
+		for vendor in Dell Epson HP Kyocera Lexmark Minolta Oki Olivetti Samsung Xerox; do \
+			$(INSTALL_DIR) $(1)/usr/share/ppd/$$$$vendor; \
+			$(CP) $(PKG_BUILD_DIR)/PPD/$$$$vendor-*.ppd $(1)/usr/share/ppd/$$$$vendor/; \
+		done; \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/FujiXerox; \
+		$(CP) $(PKG_BUILD_DIR)/PPD/Fuji_Xerox-*.ppd $(1)/usr/share/ppd/FujiXerox/; \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/Konika; \
+		$(CP) $(PKG_BUILD_DIR)/PPD/KONICA_MINOLTA-*.ppd $(1)/usr/share/ppd/Konika/; \
+		$(CP) $(PKG_BUILD_DIR)/PPD/Generic-*.ppd $(1)/usr/share/ppd/; \
+	fi
 
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/foo2zjs-set-cups-filter-permission $(1)/etc/uci-defaults/
