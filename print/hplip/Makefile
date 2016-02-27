@@ -18,7 +18,7 @@ PKG_MD5SUM:=13be6f818c4dd27518320b2b230c907f
 
 PKG_INSTALL:=1
 
-PKG_BUILD_DEPENDS := libsane
+PKG_BUILD_DEPENDS := libsane python-light
 
 include $(INCLUDE_DIR)/package.mk
 
