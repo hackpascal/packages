@@ -69,7 +69,7 @@ endef
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/poppler
-	$(CP) -a $(PKG_INSTALL_DIR)/usr/include/poppler/* $(1)/usr/include/
+	$(CP) -a $(PKG_INSTALL_DIR)/usr/include/poppler/* $(1)/usr/include/poppler/
 
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/* $(1)/usr/lib
