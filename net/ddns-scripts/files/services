@@ -54,7 +54,7 @@
 "dnsomatic.com" "http://[USERNAME]:[PASSWORD]@updates.dnsomatic.com/nic/update?hostname=[DOMAIN]&myip=[IP]"
 
 # 3322.org
-"3322.org"  "http://[USERNAME]:[PASSWORD]@members.3322.org/dyndns/update?system=dyndns&hostname=[DOMAIN]&myip=[IP]"
+"3322.org"  "http://[USERNAME]:[PASSWORD]@members.3322.net/dyndns/update?hostname=[DOMAIN]&myip=[IP]"
 
 # namecheap.com
 "namecheap.com" "http://dynamicdns.park-your-domain.com/update?host=[USERNAME]&domain=[DOMAIN]&password=[PASSWORD]&ip=[IP]"
