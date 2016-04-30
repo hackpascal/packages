@@ -3,7 +3,7 @@ config listen 'listen'
 	option enable4 '1'
 	option ipv4 '0.0.0.0'
 	option enable6 '0'
-	option ipv6 '::1'
+	option ipv6 '::'
 	option port '21'
 	option dataport '20'
 
