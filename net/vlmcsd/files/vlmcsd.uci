@@ -1,0 +1,31 @@
+
+config listen 'listen'
+	option enable4 '1'
+	option ipv4 '0.0.0.0'
+	option enable6 '1'
+	option ipv6 '::'
+	option port '1688'
+	
+config activation 'activation'
+	option maxclients '0'
+	option timeout '30'
+	option forcedisconn '0'
+	option reteyinterval ''
+	option renewinterval ''
+	option ndr64 '1'
+	option btfn '1'
+
+config epid 'epid'
+	option epidrand '1'
+	option lcid '0'
+	option windows ''
+	option office2010 ''
+	option office2013 ''
+	option hwid ''
+
+config log 'log'
+	option syslog '0'
+	option filelog '0'
+	option verbose '0'
+	option file '/var/log/vlmcsd.log'
+

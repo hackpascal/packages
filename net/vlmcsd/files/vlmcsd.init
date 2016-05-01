@@ -1,0 +1,95 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2005-2016 Weijie Gao <hackpascal@gmail.com>
+
+START=70
+
+VLMCSD_PID_FILE=/var/run/vlmcsd.pid
+
+args="/usr/bin/vlmcsd "
+
+load_config_param() {
+	local param="$1"
+	local section="$2"
+	local key="$3"
+	local default="$4"
+	local value
+
+	config_get value "$section" "$key"
+
+	[ -z "$value" ] && {
+		[ -z "$default" ] && return
+		value="$default"
+	}
+
+	append args "$param \"$value\" "
+}
+
+load_config_param_bool() {
+	local param="$1"
+	local section="$2"
+	local key="$3"
+	local reverse="$4"
+	local value
+
+	config_get_bool value "$section" "$key" "0"
+
+	[ -n "$reverse" ] && value=$((!value))
+
+	[ x"$value" = x"1" ] && append args "$param "
+}
+
+start() {
+	local value
+
+	config_load vlmcsd
+
+	config_get value listen enable4
+	[ x"$value" = x1 ] && load_config_param "-4 -L" listen ipv4
+
+	config_get value listen enable6
+	[ x"$value" = x1 ] && load_config_param "-6 -L" listen ipv6
+
+	load_config_param "-P" listen port
+
+	config_get value activation maxclients
+	[ "$value" -gt 0 ] && append args "-m \"$value\" "
+
+	load_config_param "-t" activation timeout
+	load_config_param_bool "-d" activation forcedisconn
+
+	load_config_param "-A" activation reteyinterval
+	load_config_param "-R" activation renewinterval
+
+	load_config_param_bool "-N0" activation ndr64 1
+	load_config_param_bool "-B0" activation btfn 1
+	
+	config_get value epid epidrand
+	[ \( "$value" -ge 0 \) -a \( "$value" -le 2 \) ] && append args "-r \"$value\" "
+
+	config_get value epid lcid
+	[ "$value" -gt 0 ] && append args "-C \"$value\" "
+
+	load_config_param "-w" epid windows
+	load_config_param "-0" epid office2010
+	load_config_param "-3" epid office2013
+	load_config_param "-H" epid hwid
+
+	config_get value log syslog
+	[ x"$value" = x1 ] && append args "-l syslog "
+
+	config_get value log filelog
+	[ x"$value" = x1 ] && load_config_param "-l" log file
+
+	load_config_param_bool "-v" log verbose
+
+	append args "-p \"$VLMCSD_PID_FILE\""
+
+	eval "$args"
+}
+
+stop() {
+	[ -f "$VLMCSD_PID_FILE" ] && {
+		kill $(cat "$VLMCSD_PID_FILE")
+		rm -f "$VLMCSD_PID_FILE"
+	}
+}
