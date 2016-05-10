@@ -43,11 +43,13 @@ start() {
 
 	config_load vlmcsd
 
-	config_get value listen enable4
-	[ x"$value" = x1 ] && load_config_param "-4 -L" listen ipv4
+	config_get ipv4enabled listen enable4
+	[ x"$ipv4enabled" = x1 ] && load_config_param "-4 -L" listen ipv4
 
-	config_get value listen enable6
-	[ x"$value" = x1 ] && load_config_param "-6 -L" listen ipv6
+	config_get ipv6enabled listen enable6
+	[ x"$ipv6enabled" = x1 ] && load_config_param "-6 -L" listen ipv6
+
+	[ x"$ipv4enabled$ipv6enabled" = x00 ] && return
 
 	load_config_param "-P" listen port
 
