@@ -146,7 +146,7 @@ define Build/InstallDev
 		$(STAGING_DIR_HOST)/lib/python$(PYTHON_VERSION) \
 		$(PKG_INSTALL_DIR)/usr/lib/libpython$(PYTHON_VERSION).so* \
 		$(1)/usr/lib/
-	$(CP) \
+	-$(CP) \
 		$(STAGING_DIR_HOST)/lib/pkgconfig/python.pc \
 		$(STAGING_DIR_HOST)/lib/pkgconfig/python2.pc \
 		$(STAGING_DIR_HOST)/lib/pkgconfig/python-$(PYTHON_VERSION).pc \
