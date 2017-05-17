@@ -10,16 +10,17 @@
  };
 --- a/sysdeputil.c
 +++ b/sysdeputil.c
-@@ -175,6 +175,8 @@
+@@ -175,6 +175,9 @@
  #include <pwd.h>
  #include <unistd.h>
  #include <crypt.h>
 +/* Include uci headers */
++#define _GNU_SOURCE
 +#include <uci.h>
  #endif
  
  /* Prefer libcap based capabilities over raw syscall capabilities */
-@@ -237,14 +239,24 @@
+@@ -238,14 +240,24 @@
  void vsf_remove_uwtmp(void);
  
  #ifndef VSF_SYSDEP_HAVE_PAM
@@ -45,7 +46,7 @@
    if (p_pwd == NULL)
    {
      return 0;
-@@ -300,6 +312,51 @@
+@@ -301,6 +313,51 @@
    return 0;
  }
  
