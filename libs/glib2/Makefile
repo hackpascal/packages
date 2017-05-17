@@ -45,7 +45,8 @@ define Package/glib2/description
 endef
 
 HOST_CONFIGURE_ARGS += \
-	--disable-selinux
+	--disable-selinux \
+	--with-libiconv=gnu
 
 CONFIGURE_ARGS += \
 	--enable-shared \
@@ -101,6 +102,15 @@ define Package/glib2/install
 		$(PKG_INSTALL_DIR)/usr/lib/*.so* \
 		$(1)/usr/lib/
 endef
+
+define Host/Install
+  $(call Host/Install/Default)
+	$(CP) $(HOST_BUILD_PREFIX)/bin/glib-genmarshal $(STAGING_DIR_HOST)/bin/glib-genmarshal
+endef
+
+$(eval $(call RequireCommand,xmllint, \
+	Please install libxml2-utils which provides xmllint required for build glib2 \
+))
 
 $(eval $(call HostBuild))
 $(eval $(call BuildPackage,glib2))
