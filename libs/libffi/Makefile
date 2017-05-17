@@ -64,6 +64,11 @@ define Build/InstallDev
 		$(PKG_INSTALL_DIR)/usr/lib/pkgconfig/* \
 		$(1)/usr/lib/pkgconfig/
 
+	$(INSTALL_DIR) $(1)/usr/lib/libffi-$(PKG_VERSION)/include
+	$(CP) \
+		$(PKG_INSTALL_DIR)/usr/lib/libffi-$(PKG_VERSION)/include/*.h \
+		$(1)/usr/lib/libffi-$(PKG_VERSION)/include
+
 	$(INSTALL_DIR) $(1)/usr/include
 	$(CP) \
 		$(PKG_INSTALL_DIR)/usr/lib/libffi-$(PKG_VERSION)/include/*.h \
