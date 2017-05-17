@@ -1,0 +1,13 @@
+--- a/src/target/mips_m4k.c
++++ b/src/target/mips_m4k.c
+@@ -1168,8 +1168,8 @@
+ 
+ 	fast_data_area = mips32->fast_data_area;
+ 
+-	if (address <= fast_data_area->address + fast_data_area->size &&
+-			fast_data_area->address <= address + count) {
++	if (address < fast_data_area->address + fast_data_area->size &&
++			fast_data_area->address < address + count) {
+ 		LOG_ERROR("fast_data (0x%8.8" PRIx32 ") is within write area "
+ 			  "(0x%8.8" PRIx32 "-0x%8.8" PRIx32 ").",
+ 			  fast_data_area->address, address, address + count);
