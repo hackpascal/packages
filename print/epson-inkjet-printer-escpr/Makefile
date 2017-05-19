@@ -32,6 +32,24 @@ define Package/epson-inkjet-printer-escpr/description
   Epson Inkjet ESC/P-R printer driver
 endef
 
+define Package/epson-inkjet-printer-escpr-ppds
+  SECTION:=print
+  CATEGORY:=Printing and Imaging
+  TITLE:=PPD files for Epson Inkjet ESC/P-R printer driver
+  MAINTAINER:=Weijie Gao <hackpascal@gmail.com>
+endef
+
+define Package/epson-inkjet-printer-escpr-ppds/description
+  PPD files for Epson Inkjet ESC/P-R printer driver
+endef
+
+define Package/epson-inkjet-printer-escpr-ppds/config
+config EPSON_INKJET_ESCPR_PPDS_COMPILE
+	bool "Compile ppd files"
+	depends on PACKAGE_epson-inkjet-printer-escpr-ppds
+	default n
+endef
+
 CONFIGURE_ARGS += \
 	--with-cupsfilterdir="/usr/lib/cups/filter" \
 	--with-cupsppddir="/usr/share/ppd"
@@ -47,4 +65,15 @@ define Package/epson-inkjet-printer-escpr/install
 	$(INSTALL_BIN) ./files/epson-escpr-set-cups-filters-permission $(1)/etc/uci-defaults/
 endef
 
+define Package/epson-inkjet-printer-escpr-ppds/install
+	if [ x$(CONFIG_EPSON_INKJET_ESCPR_PPDS_COMPILE) = xy ]; then \
+		$(INSTALL_DIR) $(1)/usr/lib/cups/driver; \
+		ppdbc $(PKG_INSTALL_DIR)/usr/share/ppd/epson-inkjet-printer-escpr $(1)/usr/lib/cups/driver/epson-inkjet-printer-escpr.ppdb; \
+	else \
+		$(INSTALL_DIR) $(1)/usr/share/ppd/epson-inkjet-printer-escpr; \
+		$(CP) -a $(PKG_INSTALL_DIR)/usr/share/ppd/epson-inkjet-printer-escpr/* $(1)/usr/share/ppd/epson-inkjet-printer-escpr; \
+	fi
+endef
+
 $(eval $(call BuildPackage,epson-inkjet-printer-escpr))
+$(eval $(call BuildPackage,epson-inkjet-printer-escpr-ppds))
