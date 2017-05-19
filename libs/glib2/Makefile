@@ -64,6 +64,9 @@ CONFIGURE_VARS += \
 	ac_cv_func_posix_getpwuid_r=yes \
 	ac_cv_func_posix_getgrgid_r=yes
 
+HOST_CFLAGS += -Wno-error=format-nonliteral
+TARGET_CFLAGS += -Wno-error=format-nonliteral
+
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include
 	$(CP) \
