@@ -18,8 +18,6 @@ PKG_MD5SUM:=13be6f818c4dd27518320b2b230c907f
 
 PKG_INSTALL:=1
 
-PKG_BUILD_DEPENDS := libsane python-light
-
 include $(INCLUDE_DIR)/package.mk
 
 define Package/hplip/Default
@@ -27,12 +25,20 @@ define Package/hplip/Default
   MAINTAINER:=Weijie Gao <hackpascal@gmail.com>
 endef
 
+define Package/hplip-base
+$(call Package/hplip/Default)
+  TITLE:=HP Linux Imaging and Printing Drivers (Base files)
+  SECTION:=print
+  CATEGORY:=Printing and Imaging
+  DEPENDS:=+python-light +libcups +libhpipp +libhpmud +libsane
+endef
+
 define Package/hplip-sane
 $(call Package/hplip/Default)
   TITLE:=HP Linux Imaging and Printing Drivers (SANE only)
   SECTION:=print
   CATEGORY:=Printing and Imaging
-  DEPENDS:=+libhpip +libhpipp +libhpmud +libcups
+  DEPENDS:=+hplip-base +libhpip
 endef
 
 define Package/hplip-cups
@@ -40,7 +46,7 @@ $(call Package/hplip/Default)
   TITLE:=HP Linux Imaging and Printing Drivers (CUPS only)
   SECTION:=print
   CATEGORY:=Printing and Imaging
-  DEPENDS:=+libhpmud +libcups +libcupsimage +libjpeg +libstdcpp
+  DEPENDS:=+hplip-base +libcupsimage +libjpeg +libstdcpp
 endef
 
 define Package/hplip-ppds
@@ -64,6 +70,7 @@ define Package/hplip/description/Default
   and GPL license.
 endef
 
+Package/hplip-base/description=$(Package/hplip/description/Default)
 Package/hplip-sane/description=$(Package/hplip/description/Default)
 Package/hplip-cups/description=$(Package/hplip/description/Default)
 Package/hplip-ppds/description=$(Package/hplip/description/Default)
@@ -144,9 +151,21 @@ define Build/Install
 	fi
 endef
 
+define Package/hplip-base/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(CP) -a $(PKG_INSTALL_DIR)/usr/bin/* $(1)/usr/bin
+
+	$(INSTALL_DIR) $(1)/usr/lib/python2.7/site-packages
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/python2.7/site-packages/* $(1)/usr/lib/python2.7/site-packages
+
+	$(INSTALL_DIR) $(1)/usr/share/hplip
+	$(CP) -a $(PKG_INSTALL_DIR)/usr/share/hplip/* $(1)/usr/share/hplip
+endef
+
 define Package/hplip-sane/install
 	$(INSTALL_DIR) $(1)/etc/sane.d
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/etc/sane.d/dll.conf $(1)/etc/sane.d/dll.conf
+
 	$(INSTALL_DIR) $(1)/usr/lib/sane
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/sane/*.so* $(1)/usr/lib/sane
 endef
@@ -196,6 +215,7 @@ define Package/libhpmud/install
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/libhpmud*.so* $(1)/usr/lib
 endef
 
+$(eval $(call BuildPackage,hplip-base))
 $(eval $(call BuildPackage,hplip-sane))
 $(eval $(call BuildPackage,hplip-cups))
 $(eval $(call BuildPackage,hplip-ppds))
