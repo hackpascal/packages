@@ -41,9 +41,6 @@ define Package/c2esp/install
 	$(INSTALL_DIR) $(1)/usr/lib/cups/filter
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/lib/cups/filter/* $(1)/usr/lib/cups/filter/
 
-	$(INSTALL_DIR) $(1)/usr/share/cups/drv/c2esp
-	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/share/cups/drv/c2esp/* $(1)/usr/share/cups/drv/c2esp/
-
 	$(INSTALL_DIR) $(1)/usr/share/ppd/Kodak
 	$(CP) $(PKG_BUILD_DIR)/ppd/*.ppd $(1)/usr/share/ppd/Kodak
 
