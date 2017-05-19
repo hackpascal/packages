@@ -40,9 +40,6 @@ define Package/carps-cups/install
 	$(INSTALL_DIR) $(1)/usr/share/ppd/Canon
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/ppd/*.ppd $(1)/usr/share/ppd/Canon/
 
-	$(INSTALL_DIR) $(1)/usr/share/cups/drv
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/carps.drv $(1)/usr/share/cups/drv/
-
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/rastertocarps-set-cups-filter-permission $(1)/etc/uci-defaults/
 endef
