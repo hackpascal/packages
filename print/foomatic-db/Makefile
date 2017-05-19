@@ -59,7 +59,7 @@ endef
 CONFIGURE_ARGS += \
 	--with-drivers=NOOBSOLETES,NOEMPTYCMDLINE
 
-define Build/Install
+define Build/Compile
 	# Move files
 	$(INSTALL_DIR) $(PKG_BUILD_DIR)/ppds-openprinting
 	$(CP) -a $(PKG_BUILD_DIR)/db/source/PPD/* $(PKG_BUILD_DIR)/ppds-openprinting
@@ -86,6 +86,10 @@ define Build/Install
 	if [ x$(CONFIG_OPENPRINTING_PPDS_COMPILE) = xy ]; then \
 		ppdbc $(PKG_BUILD_DIR)/ppds-openprinting $(PKG_BUILD_DIR)/openprinting-ppds.ppdb; \
 	fi
+endef
+
+define Build/Install
+	# empty
 endef
 
 define Package/foomatic-db-ppds/install
