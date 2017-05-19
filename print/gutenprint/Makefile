@@ -31,7 +31,7 @@ define Package/gutenprint
   SECTION:=print
   CATEGORY:=Printing and Imaging
   TITLE:=Gutenprint CUPS drivers
-  DEPENDS:=+libcups +libcupsimage +libgutenprint +libjpeg +libpng +libusb-1.0 +zlib
+  DEPENDS:=$(ICONV_DEPENDS) +libcups +libcupsimage +libgutenprint +libjpeg +libpng +libusb-1.0 +zlib
   URL:=http://gimp-print.sourceforge.net/
 endef
 
