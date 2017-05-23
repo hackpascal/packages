@@ -1,0 +1,10 @@
+#!/bin/sh
+uci -q batch <<-EOF >/dev/null
+	delete firewall.shadowsocks_libev
+	set firewall.shadowsocks_libev=include
+	set firewall.shadowsocks_libev.type=script
+	set firewall.shadowsocks_libev.path=/usr/share/shadowsocks-libev/firewall.include
+	set firewall.shadowsocks_libev.reload=1
+	commit firewall
+EOF
+exit 0

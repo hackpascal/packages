@@ -1,0 +1,1534 @@
+--- a/src/common.h
++++ b/src/common.h
+@@ -22,25 +22,19 @@
+ #ifndef _COMMON_H
+ #define _COMMON_H
+ 
++#include "multicall.h"
++
+ #define DEFAULT_CONF_PATH "/etc/shadowsocks-libev/config.json"
+ 
+ #ifndef SOL_TCP
+ #define SOL_TCP IPPROTO_TCP
+ #endif
+ 
+-#if defined(MODULE_TUNNEL) || defined(MODULE_REDIR)
+-#define MODULE_LOCAL
+-#endif
+-
+ #include "crypto.h"
+ 
+ int init_udprelay(const char *server_host, const char *server_port,
+-#ifdef MODULE_LOCAL
+                   const struct sockaddr *remote_addr, const int remote_addr_len,
+-#ifdef MODULE_TUNNEL
+                   const ss_addr_t tunnel_addr,
+-#endif
+-#endif
+                   int mtu, crypto_t *crypto, int timeout, const char *iface);
+ 
+ void free_udprelay(void);
+--- a/src/crypto.c
++++ b/src/crypto.c
+@@ -42,6 +42,8 @@
+ #include "utils.h"
+ #include "ppbloom.h"
+ 
++#include "multicall.h"
++
+ int
+ balloc(buffer_t *ptr, size_t capacity)
+ {
+@@ -137,11 +139,10 @@
+     }
+ 
+     // Initialize NONCE bloom filter
+-#ifdef MODULE_REMOTE
+-    ppbloom_init(BF_NUM_ENTRIES_FOR_SERVER, BF_ERROR_RATE_FOR_SERVER);
+-#else
+-    ppbloom_init(BF_NUM_ENTRIES_FOR_CLIENT, BF_ERROR_RATE_FOR_CLIENT);
+-#endif
++    if (ss_prog & SS_SERVER)
++        ppbloom_init(BF_NUM_ENTRIES_FOR_SERVER, BF_ERROR_RATE_FOR_SERVER);
++    else
++        ppbloom_init(BF_NUM_ENTRIES_FOR_CLIENT, BF_ERROR_RATE_FOR_CLIENT);
+ 
+     if (method != NULL) {
+         for (i = 0; i < STREAM_CIPHER_NUM; i++)
+--- a/src/local.c
++++ b/src/local.c
+@@ -85,9 +85,9 @@
+ #define BUF_SIZE 2048
+ #endif
+ 
+-int verbose        = 0;
+-int reuse_port     = 0;
+-int keep_resolving = 1;
++extern int verbose;
++extern int reuse_port;
++extern int keep_resolving;
+ 
+ #ifdef ANDROID
+ int vpn        = 0;
+@@ -121,7 +121,6 @@
+ static void accept_cb(EV_P_ ev_io *w, int revents);
+ static void signal_cb(EV_P_ ev_signal *w, int revents);
+ 
+-static int create_and_bind(const char *addr, const char *port);
+ #ifdef HAVE_LAUNCHD
+ static int launch_or_create(const char *addr, const char *port);
+ #endif
+@@ -136,74 +135,9 @@
+ 
+ static struct cork_dllist connections;
+ 
+-int
+-setnonblocking(int fd)
+-{
+-    int flags;
+-    if (-1 == (flags = fcntl(fd, F_GETFL, 0))) {
+-        flags = 0;
+-    }
+-    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+-}
+-
+-int
+-create_and_bind(const char *addr, const char *port)
+-{
+-    struct addrinfo hints;
+-    struct addrinfo *result, *rp;
+-    int s, listen_sock;
+-
+-    memset(&hints, 0, sizeof(struct addrinfo));
+-    hints.ai_family   = AF_UNSPEC;   /* Return IPv4 and IPv6 choices */
+-    hints.ai_socktype = SOCK_STREAM; /* We want a TCP socket */
+-    result = NULL;
+-
+-    s = getaddrinfo(addr, port, &hints, &result);
++extern int setnonblocking(int fd);
+ 
+-    if (s != 0) {
+-        LOGI("getaddrinfo: %s", gai_strerror(s));
+-        return -1;
+-    }
+-
+-    if (result == NULL) {
+-        LOGE("Could not bind");
+-        return -1;
+-    }
+-
+-    for (rp = result; rp != NULL; rp = rp->ai_next) {
+-        listen_sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+-        if (listen_sock == -1) {
+-            continue;
+-        }
+-
+-        int opt = 1;
+-        setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+-#ifdef SO_NOSIGPIPE
+-        setsockopt(listen_sock, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+-#endif
+-        if (reuse_port) {
+-            int err = set_reuseport(listen_sock);
+-            if (err == 0) {
+-                LOGI("tcp port reuse enabled");
+-            }
+-        }
+-
+-        s = bind(listen_sock, rp->ai_addr, rp->ai_addrlen);
+-        if (s == 0) {
+-            /* We managed to bind successfully! */
+-            break;
+-        } else {
+-            ERROR("bind");
+-        }
+-
+-        close(listen_sock);
+-        listen_sock = -1;
+-    }
+-
+-    freeaddrinfo(result);
+-
+-    return listen_sock;
+-}
++extern int create_and_bind(const char *addr, const char *port);
+ 
+ #ifdef HAVE_LAUNCHD
+ int
+@@ -1249,7 +1183,7 @@
+ 
+ #ifndef LIB_ONLY
+ int
+-main(int argc, char **argv)
++local_main(int argc, char **argv)
+ {
+     int i, c;
+     int pid_flags    = 0;
+@@ -1636,8 +1570,9 @@
+             FATAL("failed to resolve the provided hostname");
+         }
+         struct sockaddr *addr = (struct sockaddr *)storage;
++        ss_addr_t unused = { 0 };
+         init_udprelay(local_addr, local_port, addr,
+-                      get_sockaddr_len(addr), mtu, crypto, listen_ctx.timeout, iface);
++                      get_sockaddr_len(addr), unused, mtu, crypto, listen_ctx.timeout, iface);
+     }
+ 
+ #ifdef HAVE_LAUNCHD
+@@ -1790,8 +1725,9 @@
+     if (mode != TCP_ONLY) {
+         LOGI("udprelay enabled");
+         struct sockaddr *addr = (struct sockaddr *)(&storage);
++        ss_addr_t unused = { 0 };
+         init_udprelay(local_addr, local_port_str, addr,
+-                      get_sockaddr_len(addr), mtu, crypto, timeout, NULL);
++                      get_sockaddr_len(addr), unused, mtu, crypto, timeout, NULL);
+     }
+ 
+     if (strcmp(local_addr, ":") > 0)
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -19,7 +19,7 @@
+ endif
+ SS_COMMON_LIBS += -lev -lsodium -lm
+ 
+-bin_PROGRAMS = ss-local ss-tunnel ss-server ss-manager
++bin_PROGRAMS = ss-multicall
+ 
+ sni_src = http.c \
+           tls.c \
+@@ -33,88 +33,34 @@
+ 
+ plugin_src = plugin.c
+ 
+-ss_local_SOURCES = utils.c \
+-                   jconf.c \
+-                   json.c \
+-                   udprelay.c \
+-                   cache.c \
+-                   acl.c \
+-                   netutils.c \
+-                   local.c \
+-                   $(crypto_src) \
+-                   $(plugin_src) \
+-                   $(sni_src)
+-
+-ss_tunnel_SOURCES = utils.c \
+-                    jconf.c \
+-                    json.c \
+-                    udprelay.c \
+-                    cache.c \
+-                    netutils.c \
+-                    tunnel.c \
+-                    $(crypto_src) \
+-                    $(plugin_src)
+-
+-ss_server_SOURCES = utils.c \
+-                    netutils.c \
+-                    jconf.c \
+-                    json.c \
+-                    udprelay.c \
+-                    cache.c \
+-                    acl.c \
+-                    resolv.c \
+-                    server.c \
+-                    $(crypto_src) \
+-                    $(plugin_src) \
+-                    $(sni_src)
+-
+-ss_manager_SOURCES = utils.c \
+-                     jconf.c \
+-                     json.c \
+-                     netutils.c \
+-                     manager.c
+-
+-ss_local_LDADD = $(SS_COMMON_LIBS)
+-ss_tunnel_LDADD = $(SS_COMMON_LIBS)
+-ss_server_LDADD = $(SS_COMMON_LIBS)
+-ss_manager_LDADD = $(SS_COMMON_LIBS)
+-ss_local_LDADD += -ludns
+-ss_tunnel_LDADD += -ludns
+-ss_server_LDADD += -ludns
+-ss_manager_LDADD += -ludns
+-
+-ss_local_CFLAGS = $(AM_CFLAGS) -DMODULE_LOCAL
+-ss_tunnel_CFLAGS = $(AM_CFLAGS) -DMODULE_TUNNEL
+-ss_server_CFLAGS = $(AM_CFLAGS) -DMODULE_REMOTE
+-ss_manager_CFLAGS = $(AM_CFLAGS) -DMODULE_MANAGER
++ss_multicall_SOURCES = utils.c \
++                       jconf.c \
++                       json.c \
++                       udprelay.c \
++                       cache.c \
++                       acl.c \
++                       resolv.c \
++                       netutils.c \
++                       local.c \
++                       tunnel.c \
++                       server.c \
++                       manager.c \
++                       redir.c \
++                       multicall.c \
++                       $(crypto_src) \
++                       $(plugin_src) \
++                       $(sni_src)
++
++ss_multicall_LDADD = $(SS_COMMON_LIBS)
++ss_multicall_LDADD += -ludns
++
++ss_multicall_CFLAGS = $(AM_CFLAGS)
+ 
+ if BUILD_REDIRECTOR
+ bin_SCRIPTS = ss-nat
+-bin_PROGRAMS += ss-redir
+-ss_redir_SOURCES = utils.c \
+-                   jconf.c \
+-                   json.c \
+-                   netutils.c \
+-                   cache.c \
+-                   udprelay.c \
+-                   redir.c \
+-                   $(crypto_src) \
+-                   $(plugin_src) \
+-                   $(sni_src)
+-
+-ss_redir_CFLAGS = $(AM_CFLAGS) -DMODULE_REDIR
+-ss_redir_LDADD = $(SS_COMMON_LIBS)
+-ss_redir_LDADD += -ludns
+ endif
+ 
+-lib_LTLIBRARIES = libshadowsocks-libev.la
+-libshadowsocks_libev_la_SOURCES = $(ss_local_SOURCES)
+-libshadowsocks_libev_la_CFLAGS = $(ss_local_CFLAGS) -DLIB_ONLY
+-libshadowsocks_libev_la_LDFLAGS = -version-info $(VERSION_INFO)
+-libshadowsocks_libev_la_LIBADD = $(ss_local_LDADD)
+-include_HEADERS = shadowsocks.h
+-
+ noinst_HEADERS = acl.h crypto.h stream.h aead.h json.h netutils.h redir.h server.h tls.h uthash.h \
+                  cache.h http.h local.h plugin.h resolv.h tunnel.h utils.h base64.h ppbloom.h \
+-                 common.h jconf.h manager.h protocol.h rule.h socks5.h udprelay.h
++                 common.h jconf.h manager.h protocol.h rule.h socks5.h udprelay.h multicall.h
+ EXTRA_DIST = ss-nat
+--- a/src/manager.c
++++ b/src/manager.c
+@@ -65,7 +65,7 @@
+ #define BUF_SIZE 65535
+ #endif
+ 
+-int verbose          = 0;
++extern int verbose;
+ char *executable     = "ss-server";
+ char *working_dir    = NULL;
+ int working_dir_size = 0;
+@@ -73,15 +73,7 @@
+ static struct cork_hash_table *server_table;
+ static struct cork_hash_table *sock_table;
+ 
+-static int
+-setnonblocking(int fd)
+-{
+-    int flags;
+-    if (-1 == (flags = fcntl(fd, F_GETFL, 0))) {
+-        flags = 0;
+-    }
+-    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+-}
++extern int setnonblocking(int fd);
+ 
+ static void
+ destroy_server(struct server *server) {
+@@ -828,7 +820,7 @@
+     }
+ }
+ 
+-int
++static int
+ create_server_socket(const char *host, const char *port)
+ {
+     struct addrinfo hints;
+@@ -904,7 +896,7 @@
+ }
+ 
+ int
+-main(int argc, char **argv)
++manager_main(int argc, char **argv)
+ {
+     int i, c;
+     int pid_flags         = 0;
+--- a/src/multicall.c
++++ b/src/multicall.c
+@@ -0,0 +1,153 @@
++/*
++ * multicall.c - Provide multicall binary entry
++ *
++ * Copyright (C) 2005 - 2017 Weijie Gao <hackpascal@gmail.com>
++ *
++ * Part of this file is from samba36's multicall patch.
++ *
++ * shadowsocks-libev is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * shadowsocks-libev is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with shadowsocks-libev; see the file COPYING. If not, see
++ * <http://www.gnu.org/licenses/>.
++ */
++
++#include <stdio.h>
++#include <string.h>
++#include <fcntl.h>
++#include <memory.h>
++#include <arpa/inet.h>
++#include <sys/types.h>
++#include <sys/socket.h>
++#include <netdb.h>
++#include <unistd.h>
++
++#include "utils.h"
++#include "netutils.h"
++
++#include "multicall.h"
++
++extern int local_main(int argc, char **argv);
++extern int manager_main(int argc, char **argv);
++extern int redir_main(int argc, char **argv);
++extern int server_main(int argc, char **argv);
++extern int tunnel_main(int argc, char **argv);
++
++int ss_prog;
++
++static struct {
++	int mask;
++	const char *name;
++	int (*func)(int argc, char **argv);
++} multicall[] = {
++	{ SS_LOCAL, "ss-local", local_main },
++	{ SS_MANAGER, "ss-manager", manager_main },
++	{ SS_REDIR, "ss-redir", redir_main },
++	{ SS_SERVER, "ss-server", server_main },
++	{ SS_TUNNEL, "ss-tunnel", tunnel_main },
++};
++
++int verbose        = 0;
++int reuse_port     = 0;
++int keep_resolving = 1;
++
++#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
++
++int main(int argc, char **argv)
++{
++	int i;
++
++	for (i = 0; i < ARRAY_SIZE(multicall); i++) {
++		if (strstr(argv[0], multicall[i].name)) {
++			ss_prog = multicall[i].mask;
++			if (ss_prog == SS_TUNNEL || ss_prog == SS_REDIR)
++				ss_prog |= SS_LOCAL;
++			return multicall[i].func(argc, argv);
++		}
++	}
++
++	fprintf(stderr, "Invalid multicall command, available commands:");
++	for (i = 0; i < ARRAY_SIZE(multicall); i++)
++		fprintf(stderr, " %s", multicall[i].name);
++
++	fprintf(stderr, "\n");
++
++	return 1;
++}
++
++int
++setnonblocking(int fd)
++{
++    int flags;
++    if (-1 == (flags = fcntl(fd, F_GETFL, 0))) {
++        flags = 0;
++    }
++    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
++}
++
++int
++create_and_bind(const char *addr, const char *port)
++{
++    struct addrinfo hints;
++    struct addrinfo *result, *rp;
++    int s, listen_sock;
++
++    memset(&hints, 0, sizeof(struct addrinfo));
++    hints.ai_family   = AF_UNSPEC;   /* Return IPv4 and IPv6 choices */
++    hints.ai_socktype = SOCK_STREAM; /* We want a TCP socket */
++    result = NULL;
++
++    s = getaddrinfo(addr, port, &hints, &result);
++
++    if (s != 0) {
++        LOGI("getaddrinfo: %s", gai_strerror(s));
++        return -1;
++    }
++
++    if (result == NULL) {
++        LOGE("Could not bind");
++        return -1;
++    }
++
++    for (rp = result; rp != NULL; rp = rp->ai_next) {
++        listen_sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
++        if (listen_sock == -1) {
++            continue;
++        }
++
++        int opt = 1;
++        setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
++#ifdef SO_NOSIGPIPE
++        setsockopt(listen_sock, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
++#endif
++        if (reuse_port) {
++            int err = set_reuseport(listen_sock);
++            if (err == 0) {
++                LOGI("tcp port reuse enabled");
++            }
++        }
++
++        s = bind(listen_sock, rp->ai_addr, rp->ai_addrlen);
++        if (s == 0) {
++            /* We managed to bind successfully! */
++            break;
++        } else {
++            ERROR("bind");
++        }
++
++        close(listen_sock);
++        listen_sock = -1;
++    }
++
++    freeaddrinfo(result);
++
++    return listen_sock;
++}
+--- a/src/multicall.h
++++ b/src/multicall.h
+@@ -0,0 +1,34 @@
++/*
++ * multicall.c - Provide multicall binary entry
++ *
++ * Copyright (C) 2005 - 2017 Weijie Gao <hackpascal@gmail.com>
++ *
++ * This file is part of the shadowsocks-libev.
++ * shadowsocks-libev is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * shadowsocks-libev is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with shadowsocks-libev; see the file COPYING. If not, see
++ * <http://www.gnu.org/licenses/>.
++ */
++
++#ifndef _MULTICALL_H
++#define _MULTICALL_H
++
++/* Multicall prog definitions */
++#define SS_LOCAL	1
++#define SS_MANAGER	2
++#define SS_REDIR	4
++#define SS_SERVER	8
++#define SS_TUNNEL	16
++
++extern int ss_prog;
++
++#endif // _MULTICALL_H
+--- a/src/netutils.c
++++ b/src/netutils.c
+@@ -43,6 +43,8 @@
+ #include "netutils.h"
+ #include "utils.h"
+ 
++#include "multicall.h"
++
+ #ifndef SO_REUSEPORT
+ #define SO_REUSEPORT 15
+ #endif
+@@ -52,9 +54,7 @@
+ static const char valid_label_bytes[] =
+     "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+ 
+-#if defined(MODULE_LOCAL)
+ extern int keep_resolving;
+-#endif
+ 
+ int
+ set_reuseport(int socket)
+@@ -147,10 +147,11 @@
+ 
+         for (i = 1; i < 8; i++) {
+             err = getaddrinfo(host, port, &hints, &result);
+-#if defined(MODULE_LOCAL)
+-            if (!keep_resolving)
+-                break;
+-#endif
++
++            if (ss_prog & SS_LOCAL)
++                if (!keep_resolving)
++                    break;
++
+             if ((!block || !err)) {
+                 break;
+             } else {
+--- a/src/redir.c
++++ b/src/redir.c
+@@ -53,6 +53,7 @@
+ #include "plugin.h"
+ #include "netutils.h"
+ #include "utils.h"
++#include "jconf.h"
+ #include "common.h"
+ #include "redir.h"
+ 
+@@ -86,9 +87,9 @@
+ static void free_server(server_t *server);
+ static void close_and_free_server(EV_P_ server_t *server);
+ 
+-int verbose        = 0;
+-int reuse_port     = 0;
+-int keep_resolving = 1;
++extern int verbose;
++extern int reuse_port;
++extern int keep_resolving;
+ 
+ static crypto_t *crypto;
+ 
+@@ -119,74 +120,9 @@
+     return 0;
+ }
+ 
+-int
+-setnonblocking(int fd)
+-{
+-    int flags;
+-    if (-1 == (flags = fcntl(fd, F_GETFL, 0))) {
+-        flags = 0;
+-    }
+-    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+-}
+-
+-int
+-create_and_bind(const char *addr, const char *port)
+-{
+-    struct addrinfo hints;
+-    struct addrinfo *result, *rp;
+-    int s, listen_sock;
+-
+-    memset(&hints, 0, sizeof(struct addrinfo));
+-    hints.ai_family   = AF_UNSPEC;   /* Return IPv4 and IPv6 choices */
+-    hints.ai_socktype = SOCK_STREAM; /* We want a TCP socket */
+-
+-    result = NULL;
+-
+-    s = getaddrinfo(addr, port, &hints, &result);
+-    if (s != 0) {
+-        LOGI("getaddrinfo: %s", gai_strerror(s));
+-        return -1;
+-    }
+-
+-    if (result == NULL) {
+-        LOGE("Could not bind");
+-        return -1;
+-    }
+-
+-    for (rp = result; rp != NULL; rp = rp->ai_next) {
+-        listen_sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+-        if (listen_sock == -1) {
+-            continue;
+-        }
+-
+-        int opt = 1;
+-        setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+-#ifdef SO_NOSIGPIPE
+-        setsockopt(listen_sock, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+-#endif
+-        if (reuse_port) {
+-            int err = set_reuseport(listen_sock);
+-            if (err == 0) {
+-                LOGI("tcp port reuse enabled");
+-            }
+-        }
+-
+-        s = bind(listen_sock, rp->ai_addr, rp->ai_addrlen);
+-        if (s == 0) {
+-            /* We managed to bind successfully! */
+-            break;
+-        } else {
+-            ERROR("bind");
+-        }
++extern int setnonblocking(int fd);
+ 
+-        close(listen_sock);
+-        listen_sock = -1;
+-    }
+-
+-    freeaddrinfo(result);
+-
+-    return listen_sock;
+-}
++extern int create_and_bind(const char *addr, const char *port);
+ 
+ static void
+ server_recv_cb(EV_P_ ev_io *w, int revents)
+@@ -864,7 +800,7 @@
+ }
+ 
+ int
+-main(int argc, char **argv)
++redir_main(int argc, char **argv)
+ {
+     srand(time(NULL));
+ 
+@@ -1232,8 +1168,9 @@
+                 FATAL("failed to resolve the provided hostname");
+             }
+             struct sockaddr *addr = (struct sockaddr *)storage;
++            ss_addr_t unused = { 0 };
+             init_udprelay(local_addr, local_port, addr,
+-                          get_sockaddr_len(addr), mtu, crypto, listen_ctx_current->timeout, NULL);
++                          get_sockaddr_len(addr), unused, mtu, crypto, listen_ctx_current->timeout, NULL);
+         }
+ 
+         if (mode == UDP_ONLY) {
+--- a/src/server.c
++++ b/src/server.c
+@@ -111,8 +111,8 @@
+ static void server_resolve_cb(struct sockaddr *addr, void *data);
+ static void query_free_cb(void *data);
+ 
+-int verbose     = 0;
+-int reuse_port = 0;
++extern int verbose;
++extern int reuse_port;
+ 
+ static crypto_t *crypto;
+ 
+@@ -319,17 +319,9 @@
+     return s;
+ }
+ 
+-int
+-setnonblocking(int fd)
+-{
+-    int flags;
+-    if (-1 == (flags = fcntl(fd, F_GETFL, 0))) {
+-        flags = 0;
+-    }
+-    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+-}
++extern int setnonblocking(int fd);
+ 
+-int
++static int
+ create_and_bind(const char *host, const char *port, int mptcp)
+ {
+     struct addrinfo hints;
+@@ -1460,7 +1452,7 @@
+ }
+ 
+ int
+-main(int argc, char **argv)
++server_main(int argc, char **argv)
+ {
+     int i, c;
+     int pid_flags   = 0;
+@@ -1856,7 +1848,8 @@
+                 port = plugin_port;
+             }
+             // Setup UDP
+-            init_udprelay(host, port, mtu, crypto, atoi(timeout), iface);
++            ss_addr_t unused = { 0 };
++            init_udprelay(host, port, NULL, 0, unused, mtu, crypto, atoi(timeout), iface);
+             if (host && strcmp(host, ":") > 0)
+                 LOGI("udp server listening at [%s]:%s", host, port);
+             else
+--- a/src/tunnel.c
++++ b/src/tunnel.c
+@@ -84,9 +84,9 @@
+ int vpn = 0;
+ #endif
+ 
+-int verbose        = 0;
+-int reuse_port     = 0;
+-int keep_resolving = 1;
++extern int verbose;
++extern int reuse_port;
++extern int keep_resolving;
+ 
+ static crypto_t *crypto;
+ 
+@@ -100,74 +100,9 @@
+ static struct ev_signal sigterm_watcher;
+ static struct ev_signal sigchld_watcher;
+ 
+-static int
+-setnonblocking(int fd)
+-{
+-    int flags;
+-    if (-1 == (flags = fcntl(fd, F_GETFL, 0))) {
+-        flags = 0;
+-    }
+-    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+-}
+-
+-int
+-create_and_bind(const char *addr, const char *port)
+-{
+-    struct addrinfo hints;
+-    struct addrinfo *result, *rp;
+-    int s, listen_sock;
+-
+-    memset(&hints, 0, sizeof(struct addrinfo));
+-    hints.ai_family   = AF_UNSPEC;   /* Return IPv4 and IPv6 choices */
+-    hints.ai_socktype = SOCK_STREAM; /* We want a TCP socket */
+-
+-    result = NULL;
+-
+-    s = getaddrinfo(addr, port, &hints, &result);
+-    if (s != 0) {
+-        LOGI("getaddrinfo: %s", gai_strerror(s));
+-        return -1;
+-    }
+-
+-    if (result == NULL) {
+-        LOGE("Could not bind");
+-        return -1;
+-    }
+-
+-    for (rp = result; rp != NULL; rp = rp->ai_next) {
+-        listen_sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+-        if (listen_sock == -1) {
+-            continue;
+-        }
++extern int setnonblocking(int fd);
+ 
+-        int opt = 1;
+-        setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+-#ifdef SO_NOSIGPIPE
+-        setsockopt(listen_sock, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt));
+-#endif
+-        if (reuse_port) {
+-            int err = set_reuseport(listen_sock);
+-            if (err == 0) {
+-                LOGI("tcp port reuse enabled");
+-            }
+-        }
+-
+-        s = bind(listen_sock, rp->ai_addr, rp->ai_addrlen);
+-        if (s == 0) {
+-            /* We managed to bind successfully! */
+-            break;
+-        } else {
+-            ERROR("bind");
+-        }
+-
+-        close(listen_sock);
+-        listen_sock = -1;
+-    }
+-
+-    freeaddrinfo(result);
+-
+-    return listen_sock;
+-}
++extern int create_and_bind(const char *addr, const char *port);
+ 
+ static void
+ delayed_connect_cb(EV_P_ ev_timer *watcher, int revents)
+@@ -755,7 +690,7 @@
+ }
+ 
+ int
+-main(int argc, char **argv)
++tunnel_main(int argc, char **argv)
+ {
+     srand(time(NULL));
+ 
+--- a/src/udprelay.c
++++ b/src/udprelay.c
+@@ -54,17 +54,8 @@
+ #include "cache.h"
+ #include "udprelay.h"
+ 
+-#ifdef MODULE_REMOTE
+-#define MAX_UDP_CONN_NUM 512
+-#else
++#define MAX_UDP_CONN_REMOTE_NUM 512
+ #define MAX_UDP_CONN_NUM 256
+-#endif
+-
+-#ifdef MODULE_REMOTE
+-#ifdef MODULE_
+-#error "MODULE_REMOTE and MODULE_LOCAL should not be both defined"
+-#endif
+-#endif
+ 
+ #ifndef EAGAIN
+ #define EAGAIN EWOULDBLOCK
+@@ -79,9 +70,7 @@
+ static void remote_timeout_cb(EV_P_ ev_timer *watcher, int revents);
+ 
+ static char *hash_key(const int af, const struct sockaddr_storage *addr);
+-#ifdef MODULE_REMOTE
+ static void query_resolve_cb(struct sockaddr *addr, void *data);
+-#endif
+ static void close_and_free_remote(EV_P_ remote_ctx_t *ctx);
+ static remote_ctx_t *new_remote(int fd, server_ctx_t *server_ctx);
+ 
+@@ -93,10 +82,8 @@
+ 
+ extern int verbose;
+ extern int reuse_port;
+-#ifdef MODULE_REMOTE
+ extern uint64_t tx;
+ extern uint64_t rx;
+-#endif
+ 
+ static int packet_size                               = DEFAULT_PACKET_SIZE;
+ static int buf_size                                  = DEFAULT_PACKET_SIZE * 2;
+@@ -113,7 +100,7 @@
+     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+ }
+ 
+-#if defined(MODULE_REMOTE) && defined(SO_BROADCAST)
++#if defined(SO_BROADCAST)
+ static int
+ set_broadcast(int socket_fd)
+ {
+@@ -133,8 +120,6 @@
+ 
+ #endif
+ 
+-#ifdef MODULE_REDIR
+-
+ #ifndef IP_TRANSPARENT
+ #define IP_TRANSPARENT       19
+ #endif
+@@ -175,8 +160,6 @@
+     return 1;
+ }
+ 
+-#endif
+-
+ #define HASH_KEY_LEN sizeof(struct sockaddr_storage) + sizeof(int)
+ static char *
+ hash_key(const int af, const struct sockaddr_storage *addr)
+@@ -191,7 +174,6 @@
+     return key;
+ }
+ 
+-#if defined(MODULE_REDIR) || defined(MODULE_REMOTE)
+ static int
+ construct_udprealy_header(const struct sockaddr_storage *in_addr,
+                           char *addr_header)
+@@ -219,7 +201,6 @@
+     return addr_header_len;
+ }
+ 
+-#endif
+ 
+ static int
+ parse_udprealy_header(const char *buf, const size_t buf_len,
+@@ -455,7 +436,7 @@
+         setsockopt(server_sock, IPPROTO_IP, IP_TOS, &tos, sizeof(tos));
+ #endif
+ 
+-#ifdef MODULE_REDIR
++        if (ss_prog & SS_REDIR) {
+         if (setsockopt(server_sock, SOL_IP, IP_TRANSPARENT, &opt, sizeof(opt))) {
+             ERROR("[udp] setsockopt IP_TRANSPARENT");
+             exit(EXIT_FAILURE);
+@@ -469,7 +450,7 @@
+                 FATAL("[udp] setsockopt IPV6_RECVORIGDSTADDR");
+             }
+         }
+-#endif
++        }
+ 
+         s = bind(server_sock, rp->ai_addr, rp->ai_addrlen);
+         if (s == 0) {
+@@ -517,7 +498,6 @@
+     return ctx;
+ }
+ 
+-#ifdef MODULE_REMOTE
+ struct query_ctx *
+ new_query_ctx(char *buf, size_t len)
+ {
+@@ -546,8 +526,6 @@
+     }
+ }
+ 
+-#endif
+-
+ void
+ close_and_free_remote(EV_P_ remote_ctx_t *ctx)
+ {
+@@ -573,7 +551,6 @@
+     cache_remove(remote_ctx->server_ctx->conn_cache, key, HASH_KEY_LEN);
+ }
+ 
+-#ifdef MODULE_REMOTE
+ static void
+ query_resolve_cb(struct sockaddr *addr, void *data)
+ {
+@@ -660,8 +637,6 @@
+     close_and_free_query(EV_A_ query_ctx);
+ }
+ 
+-#endif
+-
+ static void
+ remote_recv_cb(EV_P_ ev_io *w, int revents)
+ {
+@@ -702,25 +677,28 @@
+ 
+     buf->len = r;
+ 
+-#ifdef MODULE_LOCAL
++    struct sockaddr_storage dst_addr;
++
++    if (ss_prog & SS_LOCAL) {
+     int err = server_ctx->crypto->decrypt_all(buf, server_ctx->crypto->cipher, buf_size);
+     if (err) {
+         // drop the packet silently
+         goto CLEAN_UP;
+     }
+ 
+-#ifdef MODULE_REDIR
+-    struct sockaddr_storage dst_addr;
++    int len;
++
++    if (ss_prog & SS_REDIR) {
+     memset(&dst_addr, 0, sizeof(struct sockaddr_storage));
+-    int len = parse_udprealy_header(buf->data, buf->len, NULL, NULL, &dst_addr);
++    len = parse_udprealy_header(buf->data, buf->len, NULL, NULL, &dst_addr);
+ 
+     if (dst_addr.ss_family != AF_INET && dst_addr.ss_family != AF_INET6) {
+         LOGI("[udp] ss-redir does not support domain name");
+         goto CLEAN_UP;
+     }
+-#else
+-    int len = parse_udprealy_header(buf->data, buf->len, NULL, NULL, NULL);
+-#endif
++    } else {
++    len = parse_udprealy_header(buf->data, buf->len, NULL, NULL, NULL);
++    }
+ 
+     if (len == 0) {
+         LOGI("[udp] error in parse header");
+@@ -730,11 +708,11 @@
+ 
+     // server may return using a different address type other than the type we
+     // have used during sending
+-#if defined(MODULE_TUNNEL) || defined(MODULE_REDIR)
++    if (ss_prog & (SS_TUNNEL | SS_REDIR)) {
+     // Construct packet
+     buf->len -= len;
+     memmove(buf->data, buf->data + len, buf->len);
+-#else
++    } else {
+ #ifdef ANDROID
+     rx += buf->len;
+ #endif
+@@ -743,11 +721,11 @@
+     memmove(buf->data + 3, buf->data, buf->len);
+     memset(buf->data, 0, 3);
+     buf->len += 3;
+-#endif
++    }
+ 
+-#endif
++    }
+ 
+-#ifdef MODULE_REMOTE
++    if (ss_prog & SS_SERVER) {
+ 
+     rx += buf->len;
+ 
+@@ -772,7 +750,7 @@
+         goto CLEAN_UP;
+     }
+ 
+-#endif
++    }
+ 
+     if (buf->len > packet_size) {
+         LOGE("[udp] remote_recv_sendto fragmentation");
+@@ -781,7 +759,7 @@
+ 
+     size_t remote_src_addr_len = get_sockaddr_len((struct sockaddr *)&remote_ctx->src_addr);
+ 
+-#ifdef MODULE_REDIR
++    if (ss_prog & SS_REDIR) {
+ 
+     size_t remote_dst_addr_len = get_sockaddr_len((struct sockaddr *)&dst_addr);
+ 
+@@ -821,7 +799,7 @@
+     }
+     close(src_fd);
+ 
+-#else
++    } else {
+ 
+     int s = sendto(server_ctx->fd, buf->data, buf->len, 0,
+                    (struct sockaddr *)&remote_ctx->src_addr, remote_src_addr_len);
+@@ -830,7 +808,7 @@
+         goto CLEAN_UP;
+     }
+ 
+-#endif
++    }
+ 
+     // handle the UDP packet successfully,
+     // triger the timer
+@@ -855,12 +833,13 @@
+     socklen_t src_addr_len = sizeof(struct sockaddr_storage);
+     unsigned int offset    = 0;
+ 
+-#ifdef MODULE_REDIR
++    struct sockaddr_storage dst_addr;
++
++    if (ss_prog & SS_REDIR) {
+     char control_buffer[64] = { 0 };
+     struct msghdr msg;
+     memset(&msg, 0, sizeof(struct msghdr));
+     struct iovec iov[1];
+-    struct sockaddr_storage dst_addr;
+     memset(&dst_addr, 0, sizeof(struct sockaddr_storage));
+ 
+     msg.msg_name       = &src_addr;
+@@ -888,7 +867,7 @@
+     }
+ 
+     src_addr_len = msg.msg_namelen;
+-#else
++    } else {
+     ssize_t r;
+     r = recvfrom(server_ctx->fd, buf->data, buf_size,
+                  0, (struct sockaddr *)&src_addr, &src_addr_len);
+@@ -904,13 +883,13 @@
+     }
+ 
+     buf->len = r;
+-#endif
++    }
+ 
+     if (verbose) {
+         LOGI("[udp] server receive a packet");
+     }
+ 
+-#ifdef MODULE_REMOTE
++    if (ss_prog & SS_SERVER) {
+     tx += buf->len;
+ 
+     int err = server_ctx->crypto->decrypt_all(buf, server_ctx->crypto->cipher, buf_size);
+@@ -918,17 +897,17 @@
+         // drop the packet silently
+         goto CLEAN_UP;
+     }
+-#endif
++    }
++
++    uint8_t frag = 0;
+ 
+-#ifdef MODULE_LOCAL
+-#if !defined(MODULE_TUNNEL) && !defined(MODULE_REDIR)
++    if ((ss_prog & (SS_LOCAL | SS_TUNNEL | SS_REDIR)) == SS_LOCAL) {
+ #ifdef ANDROID
+     tx += buf->len;
+ #endif
+-    uint8_t frag = *(uint8_t *)(buf->data + 2);
++    frag = *(uint8_t *)(buf->data + 2);
+     offset += 3;
+-#endif
+-#endif
++    }
+ 
+     /*
+      *
+@@ -974,9 +953,19 @@
+      *
+      */
+ 
+-#ifdef MODULE_REDIR
+-    char addr_header[512] = { 0 };
+-    int addr_header_len   = construct_udprealy_header(&dst_addr, addr_header);
++    char tmp_addr_header[512] = { 0 };
++    char *addr_header = tmp_addr_header;
++
++    char tmp_host[257] = { 0 };
++    char tmp_port[64]  = { 0 };
++
++    char *host = tmp_host;
++    char *port = tmp_port;
++
++    int addr_header_len = 0;
++
++    if (ss_prog & SS_REDIR) {
++        addr_header_len   = construct_udprealy_header(&dst_addr, addr_header);
+ 
+     if (addr_header_len == 0) {
+         LOGE("[udp] failed to parse tproxy addr");
+@@ -989,11 +978,10 @@
+     memcpy(buf->data, addr_header, addr_header_len);
+     buf->len += addr_header_len;
+ 
+-#elif MODULE_TUNNEL
++    } else if (ss_prog & SS_TUNNEL) {
+ 
+-    char addr_header[512] = { 0 };
+-    char *host            = server_ctx->tunnel_addr.host;
+-    char *port            = server_ctx->tunnel_addr.port;
++    host            = server_ctx->tunnel_addr.host;
++    port            = server_ctx->tunnel_addr.port;
+     uint16_t port_num     = (uint16_t)atoi(port);
+     uint16_t port_net_num = htons(port_num);
+     int addr_header_len   = 0;
+@@ -1045,10 +1033,8 @@
+     memcpy(buf->data, addr_header, addr_header_len);
+     buf->len += addr_header_len;
+ 
+-#else
++    } else {
+ 
+-    char host[257] = { 0 };
+-    char port[64]  = { 0 };
+     struct sockaddr_storage dst_addr;
+     memset(&dst_addr, 0, sizeof(struct sockaddr_storage));
+ 
+@@ -1059,14 +1045,15 @@
+         goto CLEAN_UP;
+     }
+ 
+-    char *addr_header = buf->data + offset;
+-#endif
++    addr_header = buf->data + offset;
++    }
+ 
+-#ifdef MODULE_LOCAL
+-    char *key = hash_key(server_ctx->remote_addr->sa_family, &src_addr);
+-#else
+-    char *key = hash_key(dst_addr.ss_family, &src_addr);
+-#endif
++    char *key;
++
++    if (ss_prog & SS_LOCAL)
++        key = hash_key(server_ctx->remote_addr->sa_family, &src_addr);
++    else
++        key = hash_key(dst_addr.ss_family, &src_addr);
+ 
+     struct cache *conn_cache = server_ctx->conn_cache;
+ 
+@@ -1086,40 +1073,40 @@
+ 
+     if (remote_ctx == NULL) {
+         if (verbose) {
+-#ifdef MODULE_REDIR
++            if (ss_prog & SS_REDIR) {
+             char src[SS_ADDRSTRLEN];
+             char dst[SS_ADDRSTRLEN];
+             strcpy(src, get_addr_str((struct sockaddr *)&src_addr));
+             strcpy(dst, get_addr_str((struct sockaddr *)&dst_addr));
+             LOGI("[udp] cache miss: %s <-> %s", dst, src);
+-#else
++            } else {
+             LOGI("[udp] cache miss: %s:%s <-> %s", host, port,
+                  get_addr_str((struct sockaddr *)&src_addr));
+-#endif
++            }
+         }
+     } else {
+         if (verbose) {
+-#ifdef MODULE_REDIR
++            if (ss_prog & SS_REDIR) {
+             char src[SS_ADDRSTRLEN];
+             char dst[SS_ADDRSTRLEN];
+             strcpy(src, get_addr_str((struct sockaddr *)&src_addr));
+             strcpy(dst, get_addr_str((struct sockaddr *)&dst_addr));
+             LOGI("[udp] cache hit: %s <-> %s", dst, src);
+-#else
++            } else {
+             LOGI("[udp] cache hit: %s:%s <-> %s", host, port,
+                  get_addr_str((struct sockaddr *)&src_addr));
+-#endif
++            }
+         }
+     }
+ 
+-#ifdef MODULE_LOCAL
++    if (ss_prog & SS_LOCAL) {
+ 
+-#if !defined(MODULE_TUNNEL) && !defined(MODULE_REDIR)
++    if (!(ss_prog & (SS_TUNNEL | SS_REDIR))) {
+     if (frag) {
+         LOGE("[udp] drop a message since frag is not 0, but %d", frag);
+         goto CLEAN_UP;
+     }
+-#endif
++    }
+ 
+     const struct sockaddr *remote_addr = server_ctx->remote_addr;
+     const int remote_addr_len          = server_ctx->remote_addr_len;
+@@ -1196,7 +1183,7 @@
+         ERROR("[udp] server_recv_sendto");
+     }
+ 
+-#else
++    } else {
+ 
+     int cache_hit  = 0;
+     int need_query = 0;
+@@ -1301,7 +1288,7 @@
+         }
+         query_ctx->query = query;
+     }
+-#endif
++    }
+ 
+ CLEAN_UP:
+     bfree(buf);
+@@ -1322,12 +1309,8 @@
+ 
+ int
+ init_udprelay(const char *server_host, const char *server_port,
+-#ifdef MODULE_LOCAL
+               const struct sockaddr *remote_addr, const int remote_addr_len,
+-#ifdef MODULE_TUNNEL
+               const ss_addr_t tunnel_addr,
+-#endif
+-#endif
+               int mtu, crypto_t *crypto, int timeout, const char *iface)
+ {
+     // Initialize ev loop
+@@ -1341,7 +1324,11 @@
+ 
+     // Initialize cache
+     struct cache *conn_cache;
+-    cache_create(&conn_cache, MAX_UDP_CONN_NUM, free_cb);
++
++    if (ss_prog & SS_SERVER)
++        cache_create(&conn_cache, MAX_UDP_CONN_REMOTE_NUM, free_cb);
++    else
++        cache_create(&conn_cache, MAX_UDP_CONN_NUM, free_cb);
+ 
+     // ////////////////////////////////////////////////
+     // Setup server context
+@@ -1354,20 +1341,18 @@
+     setnonblocking(serverfd);
+ 
+     server_ctx_t *server_ctx = new_server_ctx(serverfd);
+-#ifdef MODULE_REMOTE
++    if (ss_prog & SS_SERVER)
+     server_ctx->loop = loop;
+-#endif
+     server_ctx->timeout    = max(timeout, MIN_UDP_TIMEOUT);
+     server_ctx->crypto     = crypto;
+     server_ctx->iface      = iface;
+     server_ctx->conn_cache = conn_cache;
+-#ifdef MODULE_LOCAL
++    if (ss_prog & SS_LOCAL) {
+     server_ctx->remote_addr     = remote_addr;
+     server_ctx->remote_addr_len = remote_addr_len;
+-#ifdef MODULE_TUNNEL
++    if (ss_prog & SS_TUNNEL)
+     server_ctx->tunnel_addr = tunnel_addr;
+-#endif
+-#endif
++    }
+ 
+     ev_io_start(loop, &server_ctx->io);
+ 
+--- a/src/udprelay.h
++++ b/src/udprelay.h
+@@ -34,9 +34,7 @@
+ #include "crypto.h"
+ #include "jconf.h"
+ 
+-#ifdef MODULE_REMOTE
+ #include "resolv.h"
+-#endif
+ 
+ #include "cache.h"
+ 
+@@ -53,19 +51,12 @@
+     int timeout;
+     const char *iface;
+     struct cache *conn_cache;
+-#ifdef MODULE_LOCAL
+     const struct sockaddr *remote_addr;
+     int remote_addr_len;
+-#ifdef MODULE_TUNNEL
+     ss_addr_t tunnel_addr;
+-#endif
+-#endif
+-#ifdef MODULE_REMOTE
+     struct ev_loop *loop;
+-#endif
+ } server_ctx_t;
+ 
+-#ifdef MODULE_REMOTE
+ typedef struct query_ctx {
+     struct ResolvQuery *query;
+     struct sockaddr_storage src_addr;
+@@ -75,7 +66,6 @@
+     struct server_ctx *server_ctx;
+     struct remote_ctx *remote_ctx;
+ } query_ctx_t;
+-#endif
+ 
+ typedef struct remote_ctx {
+     ev_io io;
+@@ -85,9 +75,7 @@
+     int addr_header_len;
+     char addr_header[384];
+     struct sockaddr_storage src_addr;
+-#ifdef MODULE_REMOTE
+     struct sockaddr_storage dst_addr;
+-#endif
+     struct server_ctx *server_ctx;
+ } remote_ctx_t;
+ 
+--- a/src/utils.c
++++ b/src/utils.c
+@@ -45,6 +45,10 @@
+ #include <sys/resource.h>
+ #endif
+ 
++#include "multicall.h"
++
++extern int ss_prog;
++
+ #define INT_DIGITS 19           /* enough for 64 bit integer */
+ 
+ #ifdef LIB_ONLY
+@@ -267,17 +271,16 @@
+     printf(
+         "  maintained by Max Lv <max.c.lv@gmail.com> and Linus Yang <laokongzi@gmail.com>\n\n");
+     printf("  usage:\n\n");
+-#ifdef MODULE_LOCAL
+-    printf("    ss-local\n");
+-#elif MODULE_REMOTE
+-    printf("    ss-server\n");
+-#elif MODULE_TUNNEL
+-    printf("    ss-tunnel\n");
+-#elif MODULE_REDIR
+-    printf("    ss-redir\n");
+-#elif MODULE_MANAGER
+-    printf("    ss-manager\n");
+-#endif
++    if (ss_prog & SS_SERVER)
++        printf("    ss-server\n");
++    else if (ss_prog & SS_TUNNEL)
++        printf("    ss-tunnel\n");
++    else if (ss_prog & SS_REDIR)
++        printf("    ss-redir\n");
++    else if (ss_prog & SS_MANAGER)
++        printf("    ss-manager\n");
++    else if (ss_prog & SS_LOCAL)
++   	printf("    ss-local\n");
+     printf("\n");
+     printf(
+         "       -s <server_host>           Host name or IP address of your remote server.\n");
+@@ -322,64 +325,55 @@
+     printf(
+         "       [-n <number>]              Max number of open files.\n");
+ #endif
+-#ifndef MODULE_REDIR
+-    printf(
++    if (!(ss_prog & SS_REDIR))
++        printf(
+         "       [-i <interface>]           Network interface to bind.\n");
+-#endif
+     printf(
+         "       [-b <local_address>]       Local address to bind.\n");
+     printf("\n");
+     printf(
+         "       [-u]                       Enable UDP relay.\n");
+-#ifdef MODULE_REDIR
+-    printf(
++    if (ss_prog & SS_REDIR)
++        printf(
+         "                                  TPROXY is required in redir mode.\n");
+-#endif
+     printf(
+         "       [-U]                       Enable UDP relay and disable TCP relay.\n");
+-#ifdef MODULE_REMOTE
+-    printf(
++    if (ss_prog & SS_SERVER)
++        printf(
+         "       [-6]                       Resovle hostname to IPv6 address first.\n");
+-#endif
+     printf("\n");
+-#ifdef MODULE_TUNNEL
+-    printf(
++    if (ss_prog & SS_TUNNEL) {
++        printf(
+         "       [-L <addr>:<port>]         Destination server address and port\n");
+-    printf(
++        printf(
+         "                                  for local port forwarding.\n");
+-#endif
+-#ifdef MODULE_REMOTE
+-    printf(
++    }
++    if (ss_prog & SS_SERVER)
++        printf(
+         "       [-d <addr>]                Name servers for internal DNS resolver.\n");
+-#endif
+     printf(
+         "       [--reuse-port]             Enable port reuse.\n");
+-#if defined(MODULE_REMOTE) || defined(MODULE_LOCAL) || defined(MODULE_REDIR)
+-    printf(
++    if (ss_prog & (SS_SERVER | SS_LOCAL | SS_REDIR)) {
++        printf(
+         "       [--fast-open]              Enable TCP fast open.\n");
+-    printf(
++        printf(
+         "                                  with Linux kernel > 3.7.0.\n");
+-    printf(
++        printf(
+         "       [--acl <acl_file>]         Path to ACL (Access Control List).\n");
+-#endif
+-#if defined(MODULE_REMOTE) || defined(MODULE_MANAGER)
+-    printf(
++    }
++    if (ss_prog & (SS_SERVER | SS_MANAGER))
++        printf(
+         "       [--manager-address <addr>] UNIX domain socket address.\n");
+-#endif
+-#ifdef MODULE_MANAGER
+-    printf(
++    if (ss_prog & SS_MANAGER)
++        printf(
+         "       [--executable <path>]      Path to the executable of ss-server.\n");
+-#endif
+     printf(
+         "       [--mtu <MTU>]              MTU of your network interface.\n");
+-#ifdef __linux__
+     printf(
+         "       [--mptcp]                  Enable Multipath TCP on MPTCP Kernel.\n");
+-#endif
+-#ifndef MODULE_MANAGER
+-    printf(
++    if (ss_prog & SS_MANAGER)
++        printf(
+         "       [--key <key_in_base64>]    Key of your remote server.\n");
+-#endif
+     printf(
+         "       [--plugin <name>]          Enable SIP003 plugin. (Experimental)\n");
+     printf(
