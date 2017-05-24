@@ -1,0 +1,3 @@
+export JAVA_HOME=/usr/lib/java/jre1.8.0_131
+export PATH=$PATH:$JAVA_HOME/bin
+export CLASSPATH=.:$JAVA_HOME/lib
