@@ -44,10 +44,10 @@ start() {
 	config_load vlmcsd
 
 	config_get ipv4enabled listen enable4
-	[ x"$ipv4enabled" = x1 ] && load_config_param "-4 -L" listen ipv4
+	[ x"$ipv4enabled" = x1 ] && load_config_param "-L" listen ipv4
 
 	config_get ipv6enabled listen enable6
-	[ x"$ipv6enabled" = x1 ] && load_config_param "-6 -L" listen ipv6
+	[ x"$ipv6enabled" = x1 ] && load_config_param "-L" listen ipv6
 
 	[ x"$ipv4enabled$ipv6enabled" = x00 ] && return
 
@@ -72,8 +72,10 @@ start() {
 	[ "$value" -gt 0 ] && append args "-C \"$value\" "
 
 	load_config_param "-w" epid windows
+	load_config_param "-G" epid win10cngov
 	load_config_param "-0" epid office2010
 	load_config_param "-3" epid office2013
+	load_config_param "-6" epid office2016
 	load_config_param "-H" epid hwid
 
 	config_get value log syslog

@@ -9,13 +9,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=vlmcsd
-PKG_VERSION:=r818
+PKG_VERSION:=r1111
 PKG_RELEASE:=1
 
-PKG_SOURCE_URL:=https://github.com/vancepym/vlmcsd.git
+PKG_SOURCE_URL:=https://github.com/Wind4/vlmcsd.git
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=f75be6efdd76ade3962b3bee1e343146f1187cf9
+PKG_SOURCE_VERSION:=550df56794aa201fd2dd08153431ca20da2e6846
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 
 include $(INCLUDE_DIR)/package.mk
@@ -26,7 +26,7 @@ define Package/vlmcsd
   TITLE:=KMS Server Emulator for Windows products
   DEPENDS:=+libpthread
   MAINTAINER:=Weijie Gao <hackpascal@gmail.com>
-  URL:=https://github.com/vancepym/vlmcsd
+  URL:=https://github.com/Wind4/vlmcsd
 endef
 
 define Package/vlmcsd/description
@@ -39,7 +39,7 @@ endef
 
 define Package/vlmcsd/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/vlmcsd $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bin/vlmcsd $(1)/usr/bin
 
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/vlmcsd.uci $(1)/etc/config/vlmcsd
