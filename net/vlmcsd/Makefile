@@ -41,6 +41,9 @@ define Package/vlmcsd/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bin/vlmcsd $(1)/usr/bin
 
+	$(INSTALL_DIR) $(1)/etc
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/etc/vlmcsd.kmd $(1)/etc/vlmcsd.kmd
+
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/vlmcsd.uci $(1)/etc/config/vlmcsd
 

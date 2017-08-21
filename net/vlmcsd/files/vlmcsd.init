@@ -4,6 +4,7 @@
 START=70
 
 VLMCSD_PID_FILE=/var/run/vlmcsd.pid
+VLMCSD_KMD_FILE=/etc/vlmcsd.kmd
 
 args="/usr/bin/vlmcsd "
 
@@ -87,6 +88,7 @@ start() {
 	load_config_param_bool "-v" log verbose
 
 	append args "-p \"$VLMCSD_PID_FILE\""
+	append args "-j \"$VLMCSD_KMD_FILE\""
 
 	eval "$args"
 }
